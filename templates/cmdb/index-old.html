@@ -1,0 +1,561 @@
+{% extends 'base/base_site.html' %}
+
+{% block header_content %}
+<style>
+.center {
+ width: auto;
+ display: table;
+ margin-left: auto;
+ margin-right: auto;
+}
+.text-center {
+ text-align: center;
+}
+</style>
+{% endblock %}
+
+
+{% block container %}
+<div id="main-container">
+	<div class="main-header clearfix">
+		<div class="page-title">
+			<h3 class="no-margin">服务器列表</h3>
+			<span>设备详情列表如下：</span>
+		</div><!-- /page-title -->
+
+		<ul class="page-stats">
+			<li>
+				<div class="value">
+					<span>在线机器</span>
+					<h4 id="currentVisitor">2</h4>
+				</div>
+				<span id="visits" class="sparkline"></span>
+			</li>
+			<li>
+				<div class="value">
+					<span>待更新</span>
+					<h4>$<strong id="currentBalance">123</strong></h4>
+				</div>
+				<span id="balances" class="sparkline"></span>
+			</li>
+		</ul><!-- /page-stats -->
+	</div><!-- /main-header -->
+
+
+	<div class="padding-md">
+		<div class="panel panel-default table-responsive">
+			<!--<div class="panel-heading">-->
+				<!--Data Table-->
+				<!--<span class="label label-info pull-right">790 Items</span>-->
+			<!--</div>-->
+			<form action="/cmdb/server_list/" class="panel-body">
+				<div class="row col-xs-12 form-inline" style="margin-bottom: 20px">
+					<div class="col-xs-3 form-group">
+						<label>服务</label>
+						<input type="text" id="service" name="service" class="form-control input-sm">
+					</div><!-- /form-group -->
+					<div class="col-xs-3 form-group">
+						<label>主机名称</label>
+						<input type="text" id="host_name" name="host_name" class="form-control input-sm">
+					</div><!-- /form-group -->
+					<div class="col-xs-3 form-group">
+						<label>服务器IP</label>
+						<input type="text" id="in_ip" name="in_ip" class="form-control input-sm">
+					</div><!-- /form-group -->
+				</div>
+				<div class="row col-xs-12 form-inline" style="margin-bottom: 12px">
+					<div class="col-xs-3 form-group">
+						<label>位置</label>
+						<input type="text" id="position" name="position" class="form-control input-sm">
+					</div><!-- /form-group -->
+					<div class="col-xs-3 form-group">
+						<label>项目名称</label>
+						<input type="text" id="project_name" name="project_name" class="form-control input-sm">
+					</div><!-- /form-group -->
+					<div class="col-xs-3 form-group">
+						<label>运行状态</label>
+						<select id="status" name="status" class="form-control">
+							<option value="">请选择状态 ....</option>
+							<option value="UP">UP</option>
+							<option value="DOWN">DOWN</option>
+						</select>
+					</div><!-- /form-group -->
+                    <div class="col-xs-3 form-group">
+                        <button type="submit" class="btn btn-sm btn-success">搜索</button>
+{#                        <a type="button" href="/cmdb/server_add_page/" target="_black" class="btn btn-sm btn-info">新增</a>#}
+                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal" value="新增" data-target="#addInfoModal">新增</button>
+                    </div>
+				</div>
+{#				<div class="form-inline">#}
+{#					<button type="submit" class="btn btn-sm btn-success">搜索</button>#}
+{#					<a type="button" href="/cmdb/server_add_page/" target="_black" class="btn btn-sm btn-info">新增</a>#}
+{#                </div>#}
+			</form>
+
+				<div class="padding-md clearfix">
+				<table class="table table-striped" id="dataTable">
+					<thead>
+						<tr>
+							<th>序号</th>
+                            <th>IP</th>
+                            <th>主机名</th>
+                            <th>项目名称</th>
+                            <th>位置</th>
+							<th>服务</th>
+							<th>运行状态</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for server in paginator.current_page.object_list%}
+						<tr>
+							<td>{{forloop.counter0|add:paginator.current_page.start_index}}</td>
+							<td>{{server.in_ip}}</td>
+                            <td>
+                                <a name="host_name" class="text-info" href="#">{{server.host_name}}</a>
+                                <input type="hidden" value="{{server.os_version}}&
+                                                            {{server.os_kernel}}&{{server.cpu_model}}&
+                                                            {{server.cpu_count}}&{{server.cpu_cores}}&
+                                                            {{server.mem}}&{{server.disk}}&
+                                                            {{server.max_open_files}}&
+                                                            {{server.uptime}}&
+                                                            {{server.ex_ip}}">
+                            </td>
+                            <td>{{server.project_name}}</td>
+                            <td>{{server.position}}</td>
+							<td>
+                                <p name="service_tips" style="width:50px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;cursor:pointer;" >
+                                    {%for svc in server.services%}{{svc.service_name}} {{svc.port}}-{%endfor%}
+                                </p>
+                            </td>
+							<td>
+                                {%if server.status%}
+                                    <span><img src="/static/img/Up.gif">UP</span>
+                                {%else%}
+                                    <span style=""><img src="/static/img/Down.gif">DOWN</span>
+                                {%endif%}
+                            </td>
+							<td>
+                                <a id="edit_Id_{{server.id}}" class="btn btn-xs btn-success" data-toggle="modal" value="编辑" onclick="get_edit_info(this)" data-target="#editInfoModal">
+{#								<a class="btn btn-xs btn-success" target="_blank" href="/cmdb/server_edit_page/{{server.id}}">#}
+									<i class="fa fa-edit fa-lg"></i>
+								</a>
+								<button class="btn btn-xs btn-danger" id="server_delete_{{server.id}}">
+									<i class="fa fa-times fa-lg"></i>
+								</button>
+                                <button type="button" id="server_update_{{server.id}}" class="btn btn-xs btn-primary">更新</button>
+							</td>
+						</tr>
+						{%endfor%}
+					</tbody>
+				</table>
+				<div class="panel-footer clearfix">
+					<ul class="pagination pagination-sm center">
+					{% if paginator.current_page.has_previous %}
+						<li><a href="?{{paginator.qstr}}&p=1">First</a></li>
+						<li><a href="?{{paginator.qstr}}&p={{paginator.current_page.previous_page_number}}">Previos</a></li>
+					{% else %}
+						<li class="disabled"><a href="?{{paginator.qstr}}&p=1">First</a></li>
+						<li class="disabled"><a>Previous</a></li>
+					{% endif %}
+
+					{% for num in paginator.page_range %}
+						{% if num == paginator.current_page.number %}
+							<li class="active"><a>{{num}}</a></li>
+						{% else %}
+							<li><a href="?{{paginator.qstr}}&p={{num}}">{{num}}</a></li>
+						{% endif %}
+					{% endfor %}
+
+					{% if paginator.current_page.has_next %}
+						<li><a href="?{{paginator.qstr}}&p={{paginator.current_page.next_page_number}}">Next</a></li>
+						<li><a href="?{{paginator.qstr}}&p={{paginator.pages.num_pages}}">Last</a></li>
+					{% else %}
+						<li class="disabled"><a href="?{{paginator.qstr}}&p={{paginator.pages.num_pages}}">Last</a></li>
+						<li class="disabled"><a>Next</a></li>
+					{% endif %}
+					</ul>
+				</div>
+			</div><!-- /.padding-md -->
+
+		</div><!-- /panel -->
+	</div><!-- /padding-md -->
+
+
+                                                                  <!-- 新增服务器模态框（Modal） -->
+    <form method="post" action="" class="form-horizontal" role="form" id="add_form_data" onsubmit="" style="margin: 20px;">
+    <div class="modal fade" id="addInfoModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="addModalLabel">
+                        新增信息
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="add_ProjectName" class="col-sm-2 control-label">项目名称</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="add_ProjectName" value="" id="add_ProjectName" placeholder="输入项目名称">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="add_InIp" class="col-sm-2 control-label">内网地址</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="add_InIp" value="" id="add_InIp" placeholder="输入内网IP">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="add_ExIp" class="col-sm-2 control-label">外网地址</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="add_ExIp" value="" id="add_ExIp" placeholder="输入外网IP">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="add_Path" class="col-sm-2 control-label">机器位置</label>
+                            <div class="col-sm-9">
+                                <select id="add_Path" name="add_Path" class="form-control">
+                                    <option>请选择</option>
+                                    <option name="tengxunyun" value="腾讯云" id="tengxunyun">腾讯云</option>
+                                    <option name="aliyun" value="阿里云" id="aliyun" >阿里云</option>
+                                    <option name="idc" value="IDC" id="idc" >IDC机房</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    </button>
+{#                        <button type="button" class="btn btn-primary" onclick="account_add();">#}
+{#                            提交#}
+{#                        </button>#}
+                    <button id="addSave" type="button" class="btn btn-success">保存</button>
+                    <span id="add_tip"> </span>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+    </form>
+
+
+
+                                                                  <!-- 编辑服务器模态框（Modal） -->
+    <form method="post" action="" class="form-horizontal" role="form" id="edit_form_data" onsubmit="" style="margin: 20px;">
+    <div class="modal fade" id="editInfoModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="editModalLabel">
+                        编辑信息
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="hidden">
+                            <label for="edit_Id" class="col-sm-2 control-label">项目Id</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="edit_Id" value="" id="edit_Id" placeholder="项目Id">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_ProjectName" class="col-sm-2 control-label">项目名称</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="edit_ProjectName" value="" id="edit_ProjectName" placeholder="输入项目名称">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_InIp" class="col-sm-2 control-label">内网地址</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" disabled="disabled" name="edit_InIp" value="" id="edit_InIp" placeholder="输入内网IP">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_ExIp" class="col-sm-2 control-label">外网地址</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="edit_ExIp" value="" id="edit_ExIp" placeholder="输入外网IP">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_Path" class="col-sm-2 control-label">机器位置</label>
+                            <div class="col-sm-9">
+                                <select id="edit_Path" name="edit_Path" class="form-control">
+                                    <option>请选择</option>
+                                    <option name="tengxunyun" value="腾讯云" id="tengxunyun">腾讯云</option>
+                                    <option name="aliyun" value="阿里云" id="aliyun" >阿里云</option>
+                                    <option name="idc" value="IDC" id="idc" >IDC机房</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    </button>
+{#                        <button type="button" class="btn btn-primary" onclick="account_add();">#}
+{#                            提交#}
+{#                        </button>#}
+                    <button id="editSave" type="button" class="btn btn-success">保存</button>
+                    <span id="add_tip"> </span>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+    </form>
+
+
+</div><!-- /main-container -->
+{% endblock %}
+
+{% block footer_content %}
+
+
+<!--<script src='/static/template/js/jquery.dataTables.min.js'></script>-->
+<script>
+
+        // 编辑表单
+    function get_edit_info($this)
+    {
+        var IdTemp = $($this).parent().parent("tr").find("td:eq(7)").children("a").attr('id').split("_");
+        var Id = $.trim(IdTemp[IdTemp.length-1])
+        var InIp = $($this).parent().parent("tr").find("td:eq(1)").html();
+        var ExIpTemp = $($this).parent().parent("tr").find("td:eq(2)").children("input").val().split("&");
+        var ExIp = $.trim(ExIpTemp[ExIpTemp.length-1])
+        var ProjectName = $($this).parent().parent("tr").find("td:eq(3)").html();
+        var Path = $($this).parent().parent("tr").find("td:eq(4)").html();
+{#        var info = ExIp.split("&");#}
+{#        alert($.trim(info[info.length-1]));#}
+
+        if(!$this)
+        {
+            alert('Error！');
+            return false;
+        }
+
+    $.ajax(
+    {
+         success:function ()
+            {
+                $("#edit_Id").val(Id);
+                $("#edit_InIp").val(InIp);
+                $("#edit_ExIp").val(ExIp);
+                $("#edit_ProjectName").val(ProjectName);
+                $("#edit_Path").val(Path);
+            },
+         error:function()
+            {
+                alert('请求出错');
+            },
+          complete:function()
+            {
+                // $('#tips').hide();
+            }
+    });
+        return false;
+    }
+
+
+/*
+*保存新增服务器数据
+*/
+$('#addSave').click(function(){
+    var add_ProjectName = $("#add_ProjectName").val();
+    var add_InIp = $("#add_InIp").val();
+    var add_ExIp = $("#add_ExIp").val();
+    var add_Path = $("#add_Path").val();
+    data = {"project_name":add_ProjectName,"in_ip":add_InIp,"ex_ip":add_ExIp,"position":add_Path};
+    data = JSON.stringify(data);
+    var url = "/cmdb/server_add/";
+
+    $.post(url,{data:data},function(msg){
+        $('#addInfoModal').modal('hide')
+    	ajax_callback(msg);
+     });
+});
+
+
+/*
+*保存编辑服务器信息数据
+*/
+$('#editSave').click(function(){
+    var Id = $("#edit_Id").val();
+    var edit_InIp = $("#edit_InIp").val();
+    var edit_ExIp = $("#edit_ExIp").val();
+    var edit_ProjectName = $("#edit_ProjectName").val();
+    var edit_Path = $("#edit_Path").val();
+    data = {"project_name":edit_ProjectName,"in_ip":edit_InIp,"ex_ip":edit_ExIp,"position":edit_Path,"id":Id};
+    data = JSON.stringify(data);
+    var url = "/cmdb/server_edit/";
+
+    $.post(url,{data:data},function(msg){
+        $('#editInfoModal').modal('hide')
+    	ajax_callback(msg);
+     });
+});
+
+/*
+*设置搜索初始值
+*/
+$('#emp_num').val("{{data.emp_num}}"); //服务
+$('#host_name').val("{{host_name}}"); //主机名
+$('#in_ip').val("{{in_ip}}"); //内网IP
+$('#position').val("{{position}}"); //位置
+$('#project_name').val("{{project_name}}"); //项目名称
+$('#status').val("{{status}}"); //运行状态
+
+
+/*
+*初始化表格
+*/
+	$(function	()	{
+		$('#dataTable').dataTable( {
+    	paging: false,
+//    "ordering": false,
+    "info":     false,
+//			"lengthChange": false,
+			"bJQueryUI": true,
+//			"sPaginationType": "full_numbers",
+			"searching": false
+
+		});
+	});
+
+
+/*
+*删除机器信息
+*/
+$("table tbody tr td button[id^='server_delete']").click(function(){
+	var id_val = $(this).attr('id');
+	var id = id_val.split('_')[2];
+    var data = {"id":id};
+    data = JSON.stringify(data);
+    var url = "/cmdb/server_delete/";
+
+	var index = layer.confirm('确定删除吗？', {
+	  btn: ['确定','取消'] //按钮
+	}, function(){
+		$.post(url,{data:data},function(msg){
+			ajax_callback(msg);
+		 });
+	}, function(){
+	  layer.close(index)
+	});
+});
+
+
+/*
+*主机基本信息提示
+*/
+ $("table tbody tr td a[name='host_name']").each(function(){
+	var content = $(this).next().val().split('&');//获取隐藏的主机基本信息内容
+     console.log($(this))
+ 	var arr = new Array();
+	arr.push("<div><span>系统版本</span>&nbsp&nbsp&nbsp&nbsp"+"<span style='float:right'>"+ content[0] +"</span></div>")
+	arr.push("<div><span>系统内核</span>&nbsp&nbsp&nbsp&nbsp"+"<span style='float:right'>"+ content[1] +"</span></div>")
+	 arr.push("<div><span>CPU型号</span>&nbsp&nbsp&nbsp&nbsp"+"<span style='float:right'>"+ content[2] +"</span></div>")
+	 arr.push("<div><span>CPU个数</span>&nbsp&nbsp&nbsp&nbsp"+"<span style='float:right'>"+ content[3] +"</span></div>")
+	 arr.push("<div><span>CPU核数</span>&nbsp&nbsp&nbsp&nbsp"+"<span style='float:right'>"+ content[4] +"</span></div>")
+	 arr.push("<div><span>内存</span>&nbsp&nbsp&nbsp&nbsp"+"<span style='float:right'>"+ content[5] +" M</span></div>")
+	arr.push("<div><span>硬盘</span>&nbsp&nbsp&nbsp&nbsp"+"<span style='float:right'>"+ content[6] +"</span></div>")
+	arr.push("<div><span>最大文件打开数</span>&nbsp&nbsp&nbsp&nbsp"+"<span style='float:right'>"+ content[7] +"</span></div>")
+	arr.push("<div><span>运行时间</span>&nbsp&nbsp&nbsp&nbsp"+"<span style='float:right'>"+ content[8] +" 天</span></div>")
+	arr.push("<div><span>外网IP</span>&nbsp&nbsp&nbsp&nbsp"+"<span style='float:right'>"+ content[9] +"</span></div>")
+	new_cont = arr.join('');
+	tips($(this),new_cont,'auto','auto',1);
+});
+
+
+/*
+*主机服务、端口信息提示
+*/
+ $("table tbody tr td p[name='service_tips']").each(function(){
+	var content = $(this).text().split('-');//获取服务列的内容
+	var arr = new Array();
+	$.each(content,function(k, v){
+		values = v.split(' ')
+		arr.push("<div><span>"+ values[0] +"</span>&nbsp&nbsp&nbsp&nbsp"+"<span style='float:right'>"+ values[1] +"</span></div>")
+	})
+	arr.pop()//删除最后一个元素
+	new_cont = arr.join('');
+	tips($(this),new_cont,'auto','auto',1);
+});
+
+
+
+
+
+/*
+*小tips,鼠标悬停提示
+*/
+function tips(element,content,width,height,direction,colour){
+	height = height || 'auto';
+	width = width || 'auto';
+	direction = direction || 1;//提示层默认在上方出现
+	colour = colour || '#3595CC';
+	element.hover(
+	        function tips(){
+	            index = layer.tips(content, element, {
+	                tips: [direction, colour],
+	                time: 100000000000,
+	                area: [width,height]
+	                });
+	        },
+	        function (){
+	            layer.closeAll('tips');
+	        }
+	    );
+}
+
+/*
+*更新机器信息
+*/
+$("table tbody tr td button[id^='server_update']").click(function(){
+	var id_val = $(this).attr('id'); //获取更新按钮id值
+	var id = id_val.split('_')[2]; //获取id值的最后一位
+    var data = {"id":id};
+    data = JSON.stringify(data);
+    var url = "/cmdb/postmachineinfo/";
+
+    $.get(url,{data:data},function(msg){
+    	ajax_callback(msg);
+     });
+});
+
+/*
+*ajax get callback
+*/
+function ajax_callback(msg){
+    var msg =  $.parseJSON(msg);
+    var index = layer.alert(msg, { //layer控件提示信息
+        skin: 'layui-layer-molv' //样式类名
+    },function(){
+        if (msg == '成功'){
+            window.location="/cmdb/server_list/";
+        }
+        else if (msg == '失败'){
+            window.location="/cmdb/server_list/";
+        }
+{#        else if (msg == '无权限操作'){#}
+{#            window.location="/cmdb/server_list/";#}
+{#        }#}
+        else{
+           layer.close(index)
+        }
+    });
+}
+</script>
+{% endblock %}

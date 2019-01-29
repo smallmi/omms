@@ -1,0 +1,94 @@
+{% extends "base/base_site.html" %}
+{% load	bootstrap3 %}
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="/static/css/plugins/chosen/chosen.css">
+    {{ block.super }}
+    <style>
+        .col-center-block {
+            float: none;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+
+{% endblock %}
+{% block content %}
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>上传私服包</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal" method="post" action="{% url "deploy_maven_jar" %}" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <div class="col-sm-10 col-sm-offset-0">
+                                {% bootstrap_field form.groupId layout="horizontal" %}
+                                {% bootstrap_field form.artifactId layout="horizontal" %}
+                                {% bootstrap_field form.version layout="horizontal" %}
+                                {% bootstrap_field form.classifier layout="horizontal" %}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-8 col-center-block">
+                                <input id="file-Portrait" name="jarFile" type="file" class="file-loading">
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-8">
+                                <button class="btn btn-success" type="submit">上传</button>
+                                <button class="btn btn-white" type="reset">重置</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>输出结果：</h5>
+                    <h5>
+                        <div style="color:red;">  {{ msg }}</div>
+                    </h5>
+                </div>
+                <div class="ibox-content  pres">
+
+                    <pre> <span id="err">{{ output }}</span></pre>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ block.super }}
+    <script>
+    initFileInput("file-Portrait", "/tasks/upload_maven_jar/");
+
+        //初始化fileinput控件（第一次初始化）
+    function initFileInput(ctrlName, uploadUrl) {
+        var control = $('#' + ctrlName);
+
+        control.fileinput({
+            language: 'zh', //设置语言
+{#            uploadUrl: uploadUrl, //上传的地址#}
+            allowedFileExtensions: ['jpg', 'png', 'gif', 'jar', 'pom'],//接收的文件后缀
+            maxFileCount: 2,
+            enctype: 'multipart/form-data',
+            showUpload: false, //是否显示上传按钮
+            showCaption: false,//是否显示标题
+            browseClass: "btn btn-primary", //按钮样式
+            previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
+            msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+        });
+    }
+
+    </script>
+{% endblock %}

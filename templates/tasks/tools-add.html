@@ -1,0 +1,14 @@
+{% extends "base/base_site.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>脚本添加</h5>
+                    <div style="color:red;">  {{ msg }}</div>
+                </div>
+                {% include 'tasks/tools-add_table.html' %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

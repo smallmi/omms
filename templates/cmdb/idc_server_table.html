@@ -1,0 +1,189 @@
+{% load accounts_tag %}
+{% for i in content %}
+    <tr class="gradeA odd" role="row">
+        <td class="sorting_1">{{ forloop.counter }}</td>
+        <td class="center">{{ i.in_ip }}</td>
+        <td class="center">{{ i.app_project.app_name_cn }}</td>
+        <td class="center">{{ i.app_project.app_name_en }}</td>
+        <td>
+            {% if i.status %}
+                <span><img src="/static/img/Up.gif">UP</span>
+            {% else %}
+                <span style=""><img src="/static/img/Down.gif">DOWN</span>
+            {% endif %}
+        </td>
+        <td class="center">{{ i.ctime }}</td>
+
+        <td class="center">
+            <button data-row="{{ i.id }}|{{ i.project_name }}|{{ i.service_name }}|{{ i.in_ip }}|{{ i.ex_ip }}|{{ i.groups.all | grouptostr }}|{{ i.idc_id }}|{{ i.app_project_id }}" class="btn btn-xs btn-success btn-edit" data-toggle="modal" data-target="#editInfoModal">编辑</button>
+            <a class="btn btn-xs btn-primary btn-update" id="server_update_{{i.id}}">更新</a>
+            <a class="btn btn-xs btn-danger" id="server_delete_{{i.id}}">删除</a>
+        </td>
+    </tr>
+
+
+    <script type="text/javascript">
+        /**
+         * 编辑表单
+         * **/
+
+        $('.btn-edit').on('click', function (event) {
+
+            var groups = {{ groups | safe}};
+            var idcs ={{ idcs | safe}};
+            var apps = {{ apps | safe }};
+
+
+            var btn = $(event.target);
+            var row = btn.data('row').split('|');
+
+            $('#server_id').val(row[0]);
+{#            $('#project_name').val(row[1]);#}
+{#            $('#service_name').val(row[2]);#}
+            $('#in_ip').val(row[3]);
+            $('#ex_ip').val(row[4]);
+
+            $('#edit_idc').empty();
+            $('#edit_groups').empty();
+            $('#edit_app').empty();
+
+            var idc = row[6];
+            var app = row[7];
+            $('#edit_idc').append("<option value=''>----------</option>");
+            jQuery.each(idcs, function (key, value) {
+                var t = jQuery("<option value=" + value[0] + ">" + value[1] + "</option>");
+                if (value[0] == idc) {
+                    t.attr("selected", "selected");
+                }
+                $('#edit_idc').append(t);
+            });
+
+            $('#edit_app').append("<option value=''>----------</option>");
+            jQuery.each(apps, function (key, value) {
+                var t = jQuery("<option value=" + value[0] + ">" + value[1] + "（" + value[2] + "）" + "</option>");
+                if (value[0] == app) {
+                    t.attr("selected", "selected");
+                }
+                $('#edit_app').append(t);
+            });
+
+
+            row_group = row[5].split(',');
+            if (groups != "") {
+                $.each(groups, function (key, value) {
+                    var obj = document.getElementById("edit_groups");
+                    var op = new Option(value[1], value[0])
+                    if (row_group.contains(value[1])) {
+                        op.selected = true;
+                    }
+                    obj.add(op);
+                });
+            } else if (groups == "") {
+
+                $.each(groups, function (key, value) {
+                    var obj = document.getElementById("edit_groups");
+                    var op = new Option(value[1], value[0])
+                    obj.add(op);
+                });
+            }
+            resetChosen();
+        });
+
+    </script>
+
+
+    <script>
+        /*
+*更新机器信息
+*/
+        $("table tbody tr td a[id^='server_update']").click(function () {
+            var id_val = $(this).attr('id'); //获取更新按钮id值
+            var id = id_val.split('_')[2]; //获取id值的最后一位
+            var data = {"id": id};
+            data = JSON.stringify(data);
+            var url = "/cmdb/postmachineinfo/";
+
+            $.get(url, {data: data}, function (msg) {
+                ajax_callback(msg, {{ idcId }});
+            });
+        });
+
+
+        /*
+        *删除机器信息
+        */
+        $("table tbody tr td a[id^='server_delete']").click(function () {
+            var id_val = $(this).attr('id');
+            var id = id_val.split('_')[2];
+            var data = {"id": id};
+            data = JSON.stringify(data);
+            var url = "/cmdb/server_delete/";
+
+            var index = layer.confirm('确定删除吗？', {
+                btn: ['确定', '取消'] //按钮
+            }, function () {
+                $.post(url, {data: data}, function (msg) {
+                    ajax_callback(msg, {{ idcId }});
+                });
+            }, function () {
+                layer.close(index)
+            });
+        });
+
+
+        /*
+        *保存编辑服务器信息数据
+        */
+        $('#editSave').click(function () {
+            var server_id = $("#server_id").val();
+            var in_ip = $("#in_ip").val();
+            var ex_ip = $("#ex_ip").val();
+{#            var project_name = $("#project_name").val();#}
+{#            var service_name = $("#service_name").val();#}
+            var groups = $("#edit_groups").val();
+            var idc = $("#edit_idc").find("option:selected").val();
+            var app = $("#edit_app").find("option:selected").val();
+            data = {
+{#                "project_name": project_name,#}
+{#                "service_name": service_name,#}
+                "in_ip": in_ip,
+                "ex_ip": ex_ip,
+                "groups": groups,
+                "idc": idc,
+                "app": app,
+                "id": server_id
+            };
+            data = JSON.stringify(data);
+            var url = "/cmdb/server_edit/";
+
+            $.post(url, {data: data}, function (msg) {
+                $('#editInfoModal').modal('hide')
+                ajax_callback(msg, {{ idcId }});
+            });
+        });
+
+        /*
+        *ajax get callback
+        */
+        function ajax_callback(msg, id) {
+            var msg = $.parseJSON(msg);
+            var index = layer.alert(msg, { //layer控件提示信息
+                skin: 'layui-layer-molv' //样式类名
+            }, function () {
+                if (msg == '成功') {
+                    window.location = "/cmdb/idc_server_detail/" + id;
+                }
+                else if (msg == '失败') {
+                    window.location = "/cmdb/idc_server_detail/" + id;
+                }
+                            else if (msg == '无权限操作'){
+                                window.location="/cmdb/idc_server_detail/" + id;
+                            }
+                else {
+                    layer.close(index)
+                }
+            });
+        }
+
+    </script>
+{% endfor %}

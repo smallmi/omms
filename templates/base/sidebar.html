@@ -1,0 +1,122 @@
+<nav class="navbar-default navbar-static-side" role="navigation">
+    <div class="sidebar-collapse">
+        <ul class="nav" id="side-menu">
+            <li class="nav-header">
+                <div class="dropdown profile-element"> <span>
+                            <img alt="image" class="img-circle" src="/static/img/profile_small.jpg"/>
+                             </span>
+                    <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                            <span class="clear"> 
+                                <span class="block m-t-xs"> 
+                                <strong class="font-bold">{% if request.user.fullname %}
+                                    {{ request.user.fullname }} {% else %}
+                                    {{ request.user.username }} {% endif %}</strong>
+                                </span> 
+                                <span class="text-muted text-xs block">
+                                 {% if request.user.is_anonymous %}
+                                     匿名用户
+                                 {% elif request.user.is_superuser %}
+                                     超级管理员
+                                 {% else %}
+                                     普通用户
+                                 {% endif %}
+
+                                    <b class="caret"></b>
+                                </span> 
+                             </span>
+                    </a>
+                    <!--
+                            <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                                <li><a href="profile.html">Profile</a></li>
+                                <li><a href="contacts.html">Contacts</a></li>
+                                <li><a href="mailbox.html">Mailbox</a></li>
+                                <li class="divider"></li>
+                                <li><a href={% url 'accounts_login'%}>Logout</a></li>
+                            </ul>
+                            -->
+                </div>
+                <div class="logo-element">
+                    OMMS
+                </div>
+            </li>
+            <li>
+                <a href="{% url 'dashboard_index' %}"><i class="fa fa-dashboard"></i> <span class="nav-label">仪表盘</span></a>
+            </li>
+
+            <li>
+                <a href="{% url 'server_list' %}"><i class="fa fa-bars"></i> <span class="nav-label">资产管理</span> <span
+                        class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li><a href={% url 'server_list' %}>资产</a></li>
+                    <li><a href={% url 'server_group' %}>资产组</a></li>
+                    <li><a href={% url 'server_idc' %}>IDC机房</a></li>
+                    <li><a href={% url 'system_user' %}>登录用户</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="{% url 'app_list' %}"><i class="fa fa-git"></i> <span class="nav-label">应用管理</span> <span
+                        class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li><a href={% url 'app_list' %}>应用列表</a></li>
+                    <li><a href={% url 'app_platform' %}>平台列表</a></li>
+                    <li><a href={% url 'release_plan' %}>发布计划</a></li>
+                    <li><a href='#'>发布记录</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class="fa fa-video-camera"></i> <span class="nav-label">监控管理</span>
+                    <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li><a href="{% url 'monitor_graph' %}">监控概况</a></li>
+                    <li><a href="{% url 'monitor_list' %}">监控详情</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class="fa fa-tasks"></i> <span class="nav-label">执行任务</span>
+                    <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li><a href={% url 'cmd' %}>命令行</a></li>
+                    <li><a href={% url 'tools' %}>脚本工具</a></li>
+                    {#                    <li><a href={% url 'maven_jar' %}>上传私服包</a></li>#}
+                </ul>
+            </li>
+
+                {% if request.user.is_superuser %}
+                <li>
+                    <a href="{% url 'accounts_user' %}"><i class="fa fa-group"></i> <span
+                            class="nav-label">权限管理 </span><span class="fa arrow"></span>
+                        <!-- <span class="label label-warning pull-right">New</span>-->
+                    </a>
+                    <ul class="nav nav-second-level">
+                        <li><a href={% url 'accounts_user' %}>用户管理</a></li>
+                        <li><a href={% url 'accounts_group' %}>用户组</a></li>
+                        <li><a href="#">项目管理</a></li>
+                        <li><a href="{% url 'contact_list' %}">邮件管理</a></li>
+                    </ul>
+                </li>
+
+{#                   <li>#}
+{#                    <a href="{% url 'accounts_user' %}"><i class="fa fa-wrench"></i> <span#}
+{#                            class="nav-label">系统设置 </span><span class="fa arrow"></span>#}
+{#                        <!-- <span class="label label-warning pull-right">New</span>-->#}
+{#                    </a>#}
+{#                    <ul class="nav nav-second-level">#}
+{#                        <li><a href={% url 'accounts_user' %}>邮箱设置</a></li>#}
+{#                        <li><a href={% url 'accounts_group' %}>其他设置</a></li>#}
+{#                    </ul>#}
+{#                </li>#}
+            {% endif %}
+            <li class="special_link">
+                <a href="http://www.smallmi.com"><i class="fa fa-home"></i> <span
+                        class="nav-label">访问主站</span>
+                    <!-- <span class="label label-warning pull-right">New</span>-->
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+</nav>

@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block header_content %}
+<style>
+.center {
+ width: auto;
+ display: table;
+ margin-left: auto;
+ margin-right: auto;
+}
+.text-center {
+ text-align: center;
+}
+</style>
+<!-- Datatable -->
+<link href="/static/plugins/datatables/css/jquery.dataTables_themeroller.css" rel="stylesheet">
+{% endblock %}
+
+
+
+{% block container %}
+<div id="main-container">
+	<div class="padding-md">
+		<div class="row">
+			<div class="col-md-6">
+				<div class="panel panel-default">
+					<div class="no-margin" id="formValidate1" data-validate="parsley" novalidate="">
+						<div class="panel-heading">
+							添加机器
+						</div>
+						<div class="panel-body">
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="control-label">项目名称</label>
+										<input type="text" class="form-control input-sm parsley-validated" id="project_name">
+									</div><!-- /form-group -->
+								</div><!-- /.col -->
+							</div><!-- /.row -->
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="control-label">内网IP</label>
+										<input type="text" class="form-control input-sm parsley-validated" id="in_ip">
+									</div><!-- /form-group -->
+								</div><!-- /.col -->
+							</div><!-- /.row -->
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="control-label">外网IP</label>
+										<input type="text" class="form-control input-sm parsley-validated" id="ex_ip">
+									</div><!-- /form-group -->
+								</div><!-- /.col -->
+							</div><!-- /.row -->
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="control-label">位置</label>
+										<!--<input type="text" class="form-control input-sm parsley-validated" id="status" data-required="true">-->
+										<select id="position" class="form-control parsley-validated" data-required="true">
+											<option value="">请选择</option>
+											<option value="腾讯云">腾讯云</option>
+											<option value="阿里云">阿里云</option>
+											<option value="IDC">IDC机房</option>
+										</select>
+									</div><!-- /form-group -->
+								</div><!-- /.col -->
+							</div><!-- /.row -->
+						</div>
+						<div class="panel-footer text-right">
+							<button id="save" type="button" class="btn btn-success">保存</button>
+						</div>
+					</div>
+				</div><!-- /panel -->
+			</div><!-- /.col-->
+		</div>
+	</div>
+</div><!-- /main-container -->
+{% endblock %}
+
+
+{% block footer_content %}
+<script src="/static/plugins/layer/layer.js"></script> {# 加载layer控件，实现弹出框 #}
+<!-- Parsley表单验证 -->
+<script src="/static/template/js/parsley.min.js"></script>
+<script>
+/*
+*保存数据
+*/
+$('#save').click(function(){
+    var project_name = $("#project_name").val();
+    var in_ip = $("#in_ip").val();
+    var ex_ip = $("#ex_ip").val();
+    var position = $("#position").val();
+    data = {"project_name":project_name,"in_ip":in_ip,"ex_ip":ex_ip,"position":position};
+    data = JSON.stringify(data);
+    var url = "/cmdb/server_add/";
+
+    $.get(url,{data:data},function(msg){
+    	ajax_callback(msg);
+     });
+});
+
+
+/*
+*ajax get callback
+*/
+function ajax_callback(msg){
+    var msg =  $.parseJSON(msg);
+    var index = layer.alert(msg, {
+        skin: 'layui-layer-molv' //样式类名
+    },function(){
+        if (msg == '成功'){
+            window.location="/cmdb/server_list/";
+        }
+        else{
+           layer.close(index)
+        }
+    });
+}
+</script>
+{% endblock %}

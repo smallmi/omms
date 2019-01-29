@@ -1,0 +1,436 @@
+{% extends 'base/base_site.html' %}
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="/static/css/plugins/chosen/chosen.css">
+    {{ block.super }}
+    <style type="text/css">
+        .form-control-bulk-import {
+            width: 200px;
+            display: inline;
+        }
+    </style>
+
+{% endblock %}
+{% block content %}
+    <div class="ibox-title">
+        <h5>平台列表</h5>
+    </div>
+    <div class="ibox-content">
+        <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper form-inline">
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="dataTables_length" id="DataTables_Table_0_length" style="margin-bottom:15px;">
+                        {{ request.perms.List }}
+                        <a class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addInfoModal"><i
+                                class="fa fa-plus"></i> 添加平台</a>
+                        <input type="text" placeholder="搜索: 名称、负责人等" id="search" class="form-control input-sm">
+                    </div>
+                </div>
+            </div>
+            <table class="table table-striped table-bordered table-hover dataTables-example dataTable dtr-inline"
+                   id="DataTables_Table_0" role="grid" aria-describedby="DataTables_Table_0_info">
+                <thead>
+                <tr role="row">
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" aria-sort="ascending">序号
+                    </th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">名称</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">应用数量</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">负责人</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">手机号</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">创建时间</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">备注</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">操作</th>
+
+                </tr>
+                </thead>
+                <tbody id="content">
+                {% include 'release/platform_table.html' %}
+                </tbody>
+            </table>
+
+            <!-- 新增模态框（Modal） -->
+            <div class="modal inmodal" id="addInfoModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content animated fadeIn">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                &times;
+                            </button>
+                            <h3 class="control-label col-sm-3 col-lg-3" id="addModalLabel">
+                                新增平台信息
+                            </h3>
+                            {#                        <label for="add_ProjectName" class="control-label col-sm-3 col-lg-3">新增主机</label>#}
+                        </div>
+                        <div class="modal-body" style="margin-top: 15px">
+                            <form class="form-horizontal" id="jquery_post_from" method="post" action="">
+                                <input type="hidden" name="csrfmiddlewaretoken"
+                                       value="kRaVIjNCyIT8a9V7EzT7ffeSH3avSyg7">
+                                <div class="form-group">
+                                    <label for="add_platform" class="control-label col-sm-3 col-lg-3">平台名</label>
+                                    <div class="col-sm-8 col-lg-8">
+                                        <input type="text" class="form-control" name="add_platform" value=""
+                                               id="add_platform" placeholder="输入名称，如：支付、账单">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="add_owner" class="control-label col-sm-3 col-lg-3">负责人</label>
+                                    <div class="col-sm-8 col-lg-8">
+                                        <input type="text" class="form-control" name="add_owner" value=""
+                                               id="add_owner" placeholder="输入平台负责人姓名">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="add_phone" class="control-label col-sm-3 col-lg-3">手机号</label>
+                                    <div class="col-sm-8 col-lg-8">
+                                        <input type="text" class="form-control" name="add_phone" value=""
+                                               id="add_phone" placeholder="输入平台负责人联系方式">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="add_comment" class="control-label col-sm-3 col-lg-3">备注</label>
+                                    <div class="col-sm-8 col-lg-8">
+                                        <textarea type="text" class="form-control" name="add_comment" value=""
+                                                  id="add_comment" placeholder="输入备注"></textarea>
+                                    </div>
+                                </div>
+                            </form>
+                            <div style="text-align:center">
+                                <button id="reset" class="btn btn-white" type="cancel"> 重置</button>
+                                <button id="addSave" class="btn btn-primary btn-commit"> 提交</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 编辑模态框（Modal） -->
+            <div class="modal inmodal" id="editInfoModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content animated fadeIn">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                &times;
+                            </button>
+                            <h3 class="control-label col-sm-3 col-lg-3" id="editModalLabel">
+                                编辑应用信息
+                            </h3>
+                        </div>
+                        <div class="modal-body" style="margin-top: 15px">
+                            <form class="form-horizontal" id="jquery_post_from" method="post" action="">
+                                <input type="hidden" name="csrfmiddlewaretoken"
+                                       value="kRaVIjNCyIT8a9V7EzT7ffeSH3avSyg7">
+                                <div class="hidden">
+                                    <label for="edit_Id" class="control-label col-sm-3 col-lg-3">Id</label>
+                                    <div class="col-sm-8 col-lg-8">
+                                        <input type="text" class="form-control" name="edit_Id" value="" id="edit_Id"
+                                               placeholder="Id">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="edit_platform" class="control-label col-sm-3 col-lg-3">平台名</label>
+                                    <div class="col-sm-8 col-lg-8">
+                                        <input type="text" class="form-control" name="edit_platform" value=""
+                                               id="edit_platform" placeholder="输入名称，如：支付、账单">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="edit_owner" class="control-label col-sm-3 col-lg-3">负责人</label>
+                                    <div class="col-sm-8 col-lg-8">
+                                        <input type="text" class="form-control" name="edit_owner" value=""
+                                               id="edit_owner" placeholder="输入平台负责人姓名">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="edit_phone" class="control-label col-sm-3 col-lg-3">手机号</label>
+                                    <div class="col-sm-8 col-lg-8">
+                                        <input type="text" class="form-control" name="edit_phone" value=""
+                                               id="edit_phone" placeholder="输入平台负责人联系方式">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="edit_comment" class="control-label col-sm-3 col-lg-3">备注</label>
+                                    <div class="col-sm-8 col-lg-8">
+                                        <textarea type="text" class="form-control" name="edit_comment" value=""
+                                                  id="edit_comment" placeholder="输入备注"></textarea>
+                                    </div>
+                                </div>
+                            </form>
+                            <div style="text-align:center">
+                                {#                                <button id="reset" class="btn btn-white" type="cancel"> 重置</button>#}
+                                <button id="editSave" class="btn btn-primary btn-commit"> 提交</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            {% include 'common/paginator.html' %}
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ block.super }}
+    <script src="/static/js/plugins/chosen/chosen.jquery.js" type="text/javascript"></script>
+    <script>
+        /*
+        *删除机器信息
+        */
+        $("table tbody tr td a[id^='platform_delete']").click(function () {
+            var id_val = $(this).attr('id');
+            var id = id_val.split('_')[2];
+            var data = {"id": id};
+            data = JSON.stringify(data);
+            var url = "/release/platform_delete/";
+
+            var index = layer.confirm('确定删除吗？', {
+                btn: ['确定', '取消'] //按钮
+            }, function () {
+                $.post(url, {data: data}, function (msg) {
+                    ajax_callback(msg);
+                });
+            }, function () {
+                layer.close(index)
+            });
+        });
+
+
+        // 编辑表单
+        function get_edit_info($this) {
+            var IdTemp = $($this).parent().parent("tr").find("td:eq(7)").children("a").attr('id').split("_");
+            var Id = $.trim(IdTemp[IdTemp.length - 1])
+            var platform = $($this).parent().parent("tr").find("td:eq(1)").text();
+            var owner = $($this).parent().parent("tr").find("td:eq(3)").html();
+            var phone = $($this).parent().parent("tr").find("td:eq(4)").html();
+            var comment = $($this).parent().parent("tr").find("td:eq(6)").html();
+
+            if (!$this) {
+                alert('Error！');
+                return false;
+            }
+
+            $.ajax(
+                {
+                    success: function () {
+                        $("#edit_Id").val(Id);
+                        $("#edit_platform").val(platform);
+                        $("#edit_owner").val(owner);
+                        $("#edit_phone").val(phone);
+                        $("#edit_comment").val(comment);
+                    },
+                    error: function () {
+                        alert('请求出错');
+                    },
+                    complete: function () {
+                        // $('#tips').hide();
+                    }
+                });
+            return false;
+        }
+
+
+        /*
+        *保存编辑服务器信息数据
+        */
+        $('#editSave').click(function () {
+            var Id = $("#edit_Id").val();
+            var platform = $("#edit_platform").val();
+            var owner = $("#edit_owner").val();
+            var phone = $("#edit_phone").val();
+            var comment = $("#edit_comment").val();
+            data = {
+                "platform": platform,
+                "owner": owner,
+                "phone": phone,
+                "comment": comment,
+                "id": Id
+            };
+            data = JSON.stringify(data);
+            var url = "/release/platform_edit/";
+
+            $.post(url, {data: data}, function (msg) {
+                $('#editInfoModal').modal('hide')
+                ajax_callback(msg);
+            });
+        });
+
+        /*
+        *ajax get callback
+        */
+        function ajax_callback(msg) {
+            var msg = $.parseJSON(msg);
+            var index = layer.alert(msg, { //layer控件提示信息
+                skin: 'layui-layer-molv' //样式类名
+            }, function () {
+                if (msg == '成功') {
+                    window.location = "/release/app_platform/";
+                }
+                else if (msg == '失败') {
+                    window.location = "/release/app_platform/";
+                }
+                    {#        else if (msg == '无权限操作'){#}
+                    {#            window.location="/cmdb/server_list/";#}
+                    {#        }#}
+                else {
+                    layer.close(index)
+                }
+            });
+        }
+
+        $('#reset').click(function reset() {
+            $('#add_GroupName').val("");
+            $('#add_Comment').val("");
+        });
+
+
+        /*
+        *保存新增服务器数据
+        */
+        $('#addSave').click(function () {
+            var add_platform = $("#add_platform").val();
+            var add_owner = $("#add_owner").val();
+            var add_phone = $("#add_phone").val();
+            var add_comment = $("#add_comment").val();
+
+            data = {
+                "add_platform": add_platform,
+                "add_owner": add_owner,
+                "add_phone": add_phone,
+                "add_comment": add_comment,
+            };
+            data = JSON.stringify(data);
+            var url = "/release/platform_add/";
+
+            $.post(url, {data: data}, function (msg) {
+                $('#addInfoModal').modal('hide')
+                ajax_callback(msg);
+            });
+        });
+
+    </script>
+    <!-- 实时搜索 -->
+    <script type="text/javascript">
+        var flag;
+
+        function func1() {
+            clearTimeout(flag);
+            flag = setTimeout(function () {
+                data();
+            }, 200);
+
+        }
+
+        function data() {
+            search = $('#search').val();
+            $.ajax({
+                url: '{% url 'platform_search' %}',
+                type: 'GET',
+                dataType: 'html',
+                data: {"search": search},
+                success: function (data) {
+                    $("#content").html(data);
+                }
+            });
+        }
+
+        $("#search").keyup(function (event) {
+            func1();
+        });
+    </script>
+    <!-- 实时搜索End -->
+
+    <script type="text/javascript">
+        function resetChosen() {
+            var config = {
+                '.chosen-select': {
+                    width: "100%"
+                },
+                '.chosen-select-deselect': {
+                    allow_single_deselect: true
+                },
+                '.chosen-select-no-single': {
+                    disable_search_threshold: 10
+                },
+                '.chosen-select-no-results': {
+                    no_results_text: 'Oops, nothing found!'
+                },
+                '.chosen-select-width': {
+                    width: "100%"
+                },
+
+            }
+            for (var selector in config) {
+                $(selector).chosen(config[selector]);
+            }
+            $('#email').trigger("chosen:updated");
+        }
+
+    </script>
+    <script type="text/javascript">
+        function reset() {
+            $('#email').val("");
+        }
+
+        String.prototype.bool = function () {
+            return (/^true$/i).test(this);
+        };
+    </script>
+
+{#    <script type="text/javascript">#}
+{##}
+{#        $('.btn-email').on('click', function (event) {#}
+{#            var btn = $(event.target);#}
+{#            var row = btn.data('row').split('|');#}
+{#            var id = row[0];#}
+{#            var cauthor = row[1];#}
+{#            var nuser = "{{ request.session.fullname }}";#}
+{#            if (cauthor == nuser || "{{ request.user.is_superuser }}".bool()) {#}
+{#                $("a").attr("data-target", "#editor");#}
+{#                $("#email").empty();#}
+{#                $.get("{% url 'get_email' %}", function (data, status) {#}
+{#                    if (data.length > 0 && status == "success") {#}
+{#                        $.each(jQuery.parseJSON(data), function (k, v) {#}
+{#                            var obj = document.getElementById("email");#}
+{#                            var op = new Option(v.name, v.name)#}
+{#                            obj.add(op);#}
+{#                        })#}
+{#                    }#}
+{#                    resetChosen();#}
+{##}
+{#                });#}
+{##}
+{#                $('.btn-commit').on('click', function () {#}
+{#                    var email_group = $('#email').val();#}
+{#                    $.ajax({#}
+{#                        type: "POST",#}
+{#                        url: "{% url 'send_mails' %}",#}
+{#                        async: true,#}
+{#                        data: {"content_id": id, "email_group": JSON.stringify(email_group)},#}
+{#                        success: function (data, textStatus) {#}
+{#                            window.location.reload()#}
+{#                        },#}
+{#                        error: function (XMLHttpRequest, textStatus, errorThrown) {#}
+{#                            alert(XMLHttpRequest.status);#}
+{#                            alert(XMLHttpRequest.readyState);#}
+{#                            alert(textStatus);#}
+{#                        },#}
+{#                    });#}
+{#                });#}
+{#            }#}
+{#            else {#}
+{#                $("a").removeAttr("data-target");#}
+{#                alert("只有创建者才可以发送通知！");#}
+{#            }#}
+{##}
+{#        });#}
+{##}
+{#    </script>#}
+
+{% endblock %}

@@ -123,6 +123,6 @@ admin admin
 <img src="https://images.gitee.com/uploads/images/2019/0129/172138_4a5aa6bc_1521920.jpeg" width="220" height="220" alt="支付宝赞赏码" style="float: left;"/>
 
 
-主站：www.smallmi.com(可以通过主站搜索淘宝优惠券领券购物，可以省不少钱哦！)
+可以通过主站搜索淘宝优惠券领券购物，可以省不少钱哦！主站：http://www.smallmi.com 
 
 项目演示：http://demo.smallmi.com

@@ -1,0 +1,147 @@
+{% load accounts_tag %}
+{% for i in content %}
+    <tr class="gradeA odd" role="row">
+        <td class="sorting_1">{{ forloop.counter }}</td>
+        <td class="center">{{ i.app_name_cn}}（{{ i.app_name_en }}）</td>
+        <td class="center">{{ i.app_type }}</td>
+        <td class="center">{{ i.java_version }}</td>
+        {% if i.java_version != 0 %}
+            <td class="center">{{ i.get_java_version_display }}</td>
+        {% else %}
+            <td class="center">未使用</td>
+        {% endif %}
+        <td class="center">{{ i.ctime }}</td>
+
+        <td class="center">
+            <button data-row="{{ i.id }}|{{ i.app_name_cn }}|{{ i.app_name_en }}|{{ i.app_type }}|{{ i.git_url }}|{{ i.git_properties }}|{{ i.platform_id }}|{{ i.java_version }}" class="btn btn-xs btn-warning btn-edit" data-toggle="modal" data-target="#editInfoModal">变更</button>
+            <a class="btn btn-xs btn-danger" id="app_delete_{{i.id}}">删除</a>
+        </td>
+    </tr>
+
+
+    <script type="text/javascript">
+
+        /**
+         * 编辑表单
+         * **/
+
+        $('.btn-edit').on('click', function (event) {
+
+            var platforms ={{ platforms | safe}};
+            var java_version_list = {{ java_version_list | safe}};
+
+            var btn = $(event.target);
+            var row = btn.data('row').split('|');
+
+            $('#app_id').val(row[0]);
+            $('#app_name_cn').val(row[1]);
+            $('#app_name_en').val(row[2]);
+            $('#app_type').val(row[3]);
+            $('#git_url').val(row[4]);
+            $('#git_properties').val(row[5]);
+
+            $('#edit_platform').empty();
+            $('#edit_java_version').empty();
+
+            var platform = row[6]
+            var java_version = row[7];
+
+            jQuery.each(java_version_list,function (key, value) {
+                var t = jQuery("<option value=" + value[0]+">" + value[1] + "</option>");
+               if(value[0] == java_version){
+                    t.attr("selected","selected");
+               }
+                $('#edit_java_version').append(t);
+            });
+
+            $('#edit_platform').append("<option value=''>----------</option>");
+            jQuery.each(platforms, function (key, value) {
+                var t = jQuery("<option value=" + value[0] + ">" + value[1] + "</option>");
+                if (value[0] == platform) {
+                    t.attr("selected", "selected");
+                }
+                $('#edit_platform').append(t);
+            });
+
+        })
+    </script>
+
+    <script>
+        /*
+        *删除机器信息
+        */
+        $("table tbody tr td a[id^='app_delete']").click(function () {
+            var id_val = $(this).attr('id');
+            var id = id_val.split('_')[2];
+            var data = {"id": id};
+            data = JSON.stringify(data);
+            var url = "/release/app_delete/";
+
+            var index = layer.confirm('确定删除吗？', {
+                btn: ['确定', '取消'] //按钮
+            }, function () {
+                $.post(url, {data: data}, function (msg) {
+                    update_ajax_callback(msg, {{ platformId }});
+                });
+            }, function () {
+                layer.close(index)
+            });
+        });
+
+
+         /*
+        *保存编辑服务器信息数据
+        */
+        $('#editSave').click(function () {
+            var app_id = $("#app_id").val();
+            var app_name_cn = $("#app_name_cn").val();
+            var app_name_en = $("#app_name_en").val();
+            var app_type = $("#app_type").val();
+            var git_url = $("#git_url").val();
+            var git_properties = $("#git_properties").val();
+            var edit_java_version = $("#edit_java_version").find("option:selected").val();
+            var edit_platform = $("#edit_platform").find("option:selected").val();
+            data = {
+                "app_id": app_id,
+                "app_name_cn": app_name_cn,
+                "app_name_en": app_name_en,
+                "app_type": app_type,
+                "git_url": git_url,
+                "git_properties": git_properties,
+                "edit_java_version": edit_java_version,
+                "edit_platform": edit_platform
+            };
+            data = JSON.stringify(data);
+            var url = "/release/app_edit/";
+
+            $.post(url, {data: data}, function (msg) {
+                $('#editInfoModal').modal('hide')
+                update_ajax_callback(msg, {{ platformId }});
+            });
+        });
+
+        /*
+*ajax get callback
+*/
+        function update_ajax_callback(msg, id) {
+            var msg = $.parseJSON(msg);
+            var index = layer.alert(msg, { //layer控件提示信息
+                skin: 'layui-layer-molv' //样式类名
+            }, function () {
+                if (msg == '成功') {
+                    window.location = "/release/platform_app_detail/" + id;
+                }
+                else if (msg == '失败') {
+                    window.location = "/release/platform_app_detail/" + id;
+                }
+                    {#        else if (msg == '无权限操作'){#}
+                    {#            window.location="/cmdb/server_list/";#}
+                    {#        }#}
+                else {
+                    layer.close(index)
+                }
+            });
+        }
+
+    </script>
+{% endfor %}

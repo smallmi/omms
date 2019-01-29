@@ -1,0 +1,14 @@
+{% for i in content %}
+    <tr class="gradeA odd" role="row">
+        <td class="sorting_1">{{ forloop.counter }}</td>
+        <td class="center"><a href="/cmdb/group_server_detail/{{ i.id }}">{{ i.name }}</a></td>
+        <td class="center">{{ i.average_server }}</td>
+        <td class="center">{{ i.comment }}</td>
+        <td class="center">{{ i.created_by.fullname }}</td>
+        <td class="center">{{ i.date_created }}</td>
+        <td class="center">
+            <a id="edit_Id_{{i.id}}" class="btn btn-xs btn-success btn-edit" data-toggle="modal" value="编辑" onclick="get_edit_info(this)" data-target="#editInfoModal">编辑</a>
+            <a class="btn btn-xs btn-danger btn-edit" id="group_delete_{{i.id}}">删除</a>
+        </td>
+    </tr>
+{% endfor %}

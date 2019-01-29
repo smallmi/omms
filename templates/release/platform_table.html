@@ -1,0 +1,123 @@
+{% for i in content %}
+    <tr class="gradeA odd" role="row">
+        <td class="sorting_1">{{ forloop.counter }}</td>
+        <td class="center"><a href="/release/platform_app_detail/{{ i.id }}">{{ i.name }}</a></td>
+        <td class="center">{{ i.average_app }}</td>
+        <td class="center">{{ i.owner }}</td>
+        <td class="center">{{ i.phone }}</td>
+        <td class="center">{{ i.date_created }}</td>
+        <td class="center">{{ i.comment }}</td>
+        <td class="center">
+            <a id="edit_Id_{{ i.id }}" class="btn btn-xs btn-success btn-edit" data-toggle="modal" value="编辑"
+               onclick="get_edit_info(this)" data-target="#editInfoModal">编辑</a>
+            <a class="btn btn-xs btn-danger btn-edit" id="platform_delete_{{ i.id }}">删除</a>
+        </td>
+    </tr>
+
+
+    <script type="text/javascript">
+        /*
+        *删除机器信息
+        */
+        $("table tbody tr td a[id^='platform_delete']").click(function () {
+            var id_val = $(this).attr('id');
+            var id = id_val.split('_')[2];
+            var data = {"id": id};
+            data = JSON.stringify(data);
+            var url = "/release/platform_delete/";
+
+            var index = layer.confirm('确定删除吗？', {
+                btn: ['确定', '取消'] //按钮
+            }, function () {
+                $.post(url, {data: data}, function (msg) {
+                    ajax_callback(msg);
+                });
+            }, function () {
+                layer.close(index)
+            });
+        });
+
+
+        // 编辑表单
+        function get_edit_info($this) {
+            var IdTemp = $($this).parent().parent("tr").find("td:eq(7)").children("a").attr('id').split("_");
+            var Id = $.trim(IdTemp[IdTemp.length - 1])
+            var platform = $($this).parent().parent("tr").find("td:eq(1)").text();
+            var owner = $($this).parent().parent("tr").find("td:eq(3)").html();
+            var phone = $($this).parent().parent("tr").find("td:eq(4)").html();
+            var comment = $($this).parent().parent("tr").find("td:eq(6)").html();
+
+            if (!$this) {
+                alert('Error！');
+                return false;
+            }
+
+            $.ajax(
+                {
+                    success: function () {
+                        $("#edit_Id").val(Id);
+                        $("#edit_platform").val(platform);
+                        $("#edit_owner").val(owner);
+                        $("#edit_phone").val(phone);
+                        $("#edit_comment").val(comment);
+                    },
+                    error: function () {
+                        alert('请求出错');
+                    },
+                    complete: function () {
+                        // $('#tips').hide();
+                    }
+                });
+            return false;
+        }
+
+
+        /*
+        *保存编辑服务器信息数据
+        */
+        $('#editSave').click(function () {
+            var Id = $("#edit_Id").val();
+            var platform = $("#edit_platform").val();
+            var owner = $("#edit_owner").val();
+            var phone = $("#edit_phone").val();
+            var comment = $("#edit_comment").val();
+            data = {
+                "platform": platform,
+                "owner": owner,
+                "phone": phone,
+                "comment": comment,
+                "id": Id
+            };
+            data = JSON.stringify(data);
+            var url = "/release/platform_edit/";
+
+            $.post(url, {data: data}, function (msg) {
+                $('#editInfoModal').modal('hide')
+                ajax_callback(msg);
+            });
+        });
+
+        /*
+        *ajax get callback
+        */
+        function ajax_callback(msg) {
+            var msg = $.parseJSON(msg);
+            var index = layer.alert(msg, { //layer控件提示信息
+                skin: 'layui-layer-molv' //样式类名
+            }, function () {
+                if (msg == '成功') {
+                    window.location = "/release/app_platform/";
+                }
+                else if (msg == '失败') {
+                    window.location = "/release/app_platform/";
+                }
+                    {#        else if (msg == '无权限操作'){#}
+                    {#            window.location="/cmdb/server_list/";#}
+                    {#        }#}
+                else {
+                    layer.close(index)
+                }
+            });
+        }
+    </script>
+{% endfor %}

@@ -1,0 +1,296 @@
+{% extends 'base/base_site.html' %}
+{% block css %}
+    {{ block.super }}
+{% endblock %}
+{% block content %}
+    <div class="ibox-title" style="background-color:#E8FFF5">
+        <h5>监控概况</h5>
+        <h6 align="center">友情提醒：此页面为样本</h6>
+    </div>
+    <div class="ibox-content">
+        <div class="row">
+            <div id="monitor_list" style="float: left; width: 45%; height: 350px;">
+            </div>
+            <div id="monitor_pie" style="float: left; width: 45%; height: 350px;">
+            </div>
+        </div>
+        <HR style="" width="90%">
+        <div class="row">
+            <div id="host_list" style="float: left; width: 45%; height: 350px;">
+            </div>
+            <div id="host_pie" style="float: left; width: 45%; height: 350px;">
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ block.super }}
+
+    <script type="text/javascript">
+        var monitorlist_Chart = echarts.init(document.getElementById('monitor_list'));
+        var hostlist_Chart = echarts.init(document.getElementById('host_list'));
+        var monitorpie_Chart = echarts.init(document.getElementById('monitor_pie'));
+        var hostpie_Chart = echarts.init(document.getElementById('host_pie'));
+        var hostlist_option = {
+            title: {
+                text: '平台告警统计',
+                subtext: 'ping, mem, disk, swap'
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['连通性', '内存', '磁盘', 'Swap']
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    mark: {show: true},
+                    dataView: {show: true, readOnly: false},
+                    magicType: {show: true, type: ['line', 'bar']},
+                    restore: {show: true},
+                    saveAsImage: {show: true}
+                }
+            },
+            calculable: true,
+            xAxis: [
+                {
+                    type: 'category',
+                    data: ['支付', '客户', '账单', '容灾']
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value'
+                }
+            ],
+            series: [
+                {
+                    name: '连通性',
+                    type: 'bar',
+                    data: [1],
+                    markPoint: {
+                        data: [
+                            {type: 'max', name: '最大值'},
+                            {type: 'min', name: '最小值'}
+                        ]
+                    },
+                },
+                {
+                    name: '内存',
+                    type: 'bar',
+                    data: [3],
+                    markLine: {
+                        data: [
+                            {type: 'max', name: '最大值'},
+                            {type: 'min', name: '最小值'}
+                        ]
+                    }
+                },
+                {
+                    name: '磁盘',
+                    type: 'bar',
+                    data: [2],
+                    markLine: {
+                        data: [
+                            {type: 'max', name: '最大值'},
+                            {type: 'min', name: '最小值'}
+                        ]
+                    }
+                },
+                {
+                    name: 'Swap',
+                    type: 'bar',
+                    data: [1],
+                    markLine: {
+                        data: [
+                            {type: 'max', name: '最大值'},
+                            {type: 'min', name: '最小值'}
+                        ]
+                    }
+                }
+            ]
+        };
+        var monitorlist_option = {
+            title: {
+                x: 'center',
+                text: '异常告警统计',
+                subtext: '所有异常情况',
+                link: 'http://localhost:5000/hosts_monitor'
+            },
+            tooltip: {
+                trigger: 'item'
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    dataView: {show: true, readOnly: false},
+                    restore: {show: true},
+                    saveAsImage: {show: true}
+                }
+            },
+            calculable: true,
+            grid: {
+                borderWidth: 0,
+                y: 80,
+                y2: 60
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    show: false,
+                    data: ['连通性异常', '内存告警', '磁盘告警', 'Swap告警']
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    show: false
+                }
+            ],
+            series: [
+                {
+                    name: '异常告警统计',
+                    type: 'bar',
+                    itemStyle: {
+                        normal: {
+                            color: function (params) {
+                                // build a color map as your need.
+                                var colorList = [
+                                    '#C1232B', '#FCCE10', '#F3A43B', '#F0805A'
+                                ];
+                                return colorList[params.dataIndex]
+                            },
+                            label: {
+                                show: true,
+                                position: 'top',
+                                formatter: '{b}\n{c}'
+                            }
+                        }
+                    },
+                    data: [1],
+                    markPoint: {
+                        tooltip: {
+                            trigger: 'item',
+                            backgroundColor: 'rgba(0,0,0,0)',
+                            formatter: function (params) {
+                                return '<img src="'
+                                    + params.data.symbol.replace('image://', '')
+                                    + '"/>';
+                            }
+                        },
+                    }
+                }
+            ]
+        };
+
+        var hostpie_option = {
+            title: {
+                text: '各平台服务器统计',
+                subtext: '平台容量',
+                x: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                x: 'left',
+                data: ['支付平台', '客户平台', '账单平台', '容灾环境']
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    mark: {show: true},
+                    dataView: {show: true, readOnly: false},
+                    magicType: {
+                        show: true,
+                        type: ['pie', 'funnel'],
+                        option: {
+                            funnel: {
+                                x: '25%',
+                                width: '50%',
+                                funnelAlign: 'left',
+                                max: 1548
+                            }
+                        }
+                    },
+                    restore: {show: true},
+                    saveAsImage: {show: true}
+                }
+            },
+            calculable: true,
+            series: [
+                {
+                    name: '数量统计',
+                    type: 'pie',
+                    radius: '55%',
+                    center: ['50%', '60%'],
+                    data: [
+                        {value:1, name: '支付平台'},
+                        {value:2, name: '客户平台'},
+                        {value:3, name: '账单平台'},
+                        {value:4, name: '容灾环境'},
+                    ]
+                }
+            ]
+        };
+
+        var monitorpie_option = {
+            title: {
+                text: '',
+                subtext: '各平台告警统计',
+                x: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+//            x : 'center',
+//            y : 'bottom',
+                data: ['支付告警', '客户告警', '账单告警', '容灾告警']
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    mark: {show: true},
+                    dataView: {show: true, readOnly: false},
+                    magicType: {
+                        show: true,
+                        type: ['pie', 'funnel']
+                    },
+                    restore: {show: true},
+                    saveAsImage: {show: true}
+                }
+            },
+            calculable: true,
+            series: [
+                {
+                    name: '告警模式',
+                    type: 'pie',
+                    radius: [30, 110],
+                    center: ['40%', 200],
+                    roseType: 'area',
+                    x: '50%',               // for funnel
+                    max: 40,                // for funnel
+                    sort: 'ascending',     // for funnel
+                    data: [
+                        {value:1, name: '支付告警'},
+                        {value:2, name: '客户告警'},
+                        {value:3, name: '账单告警'},
+                        {value:4, name: '容灾告警'}
+                    ]
+                }
+            ]
+        };
+
+
+        hostlist_Chart.setOption(hostlist_option);
+        monitorlist_Chart.setOption(monitorlist_option);
+        hostpie_Chart.setOption(hostpie_option);
+        monitorpie_Chart.setOption(monitorpie_option);
+    </script>
+
+{% endblock %}

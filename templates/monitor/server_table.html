@@ -1,0 +1,50 @@
+{% load accounts_tag %}
+{% for i in content %}
+    <tr class="gradeA odd" role="row" id="{{ i.id }}">
+        <td class="sorting_1">{{ forloop.counter }}</td>
+        <td class="center">{{ i.in_ip }}</td>
+        <td class="center">{{ i.app_project.platform.name }}</td>
+        <td class="center">{{ i.app_project.app_name_en }}</td>
+        {% if i.mem_rate >= '80' %}
+            <td class="btn-warning">{{ i.mem_rate }}%</td>
+        {% elif i.mem_rate %}
+            <td class="center">{{ i.mem_rate }}%</td>
+        {% else %}
+            <td class="center">{{ i.mem_rate }}</td>
+        {% endif %}
+
+        {% if i.disk_rate >= '80' %}
+            <td class="btn-warning">{{ i.disk_rate }}%</td>
+        {% elif i.disk_rate %}
+            <td class="center">{{ i.disk_rate }}%</td>
+        {% else %}
+            <td class="center">{{ i.disk_rate }}</td>
+        {% endif %}
+
+        {% if i.swap_rate >= '80' %}
+            <td class="btn-warning">{{ i.swap_rate }}%</td>
+        {% elif i.swap_rate %}
+            <td class="center">{{ i.swap_rate }}%</td>
+        {% else %}
+            <td class="center">{{ i.swap_rate }}</td>
+        {% endif %}
+
+        <td>
+            {% if i.status %}
+                <span><img src="/static/img/Up.gif">UP</span>
+            {% else %}
+                <span style=""><img src="/static/img/Down.gif">DOWN</span>
+            {% endif %}
+        </td>
+
+        <td class="center">
+{#            <a class="btn btn-xs btn-default" id="server_update_{{ i.id }}">刷新</a>#}
+            {% if i.status %}
+                <a class="btn btn-xs btn-primary disabled" id="detail_{{ i.id }}">查看详情</a>
+            {% else %}
+                <a class="btn btn-xs btn-danger disabled" id="sendEmail_{{ i.id }}">邮件通知</a>
+            {% endif %}
+        </td>
+    </tr>
+
+{% endfor %}

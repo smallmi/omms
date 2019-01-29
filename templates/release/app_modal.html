@@ -1,0 +1,148 @@
+<!-- 新增服务器模态框（Modal） -->
+<div class="modal inmodal" id="addInfoModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated fadeIn">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h3 class="control-label col-sm-3 col-lg-3" id="addModalLabel">
+                    新增应用信息
+                </h3>
+                {#                        <label for="add_ProjectName" class="control-label col-sm-3 col-lg-3">新增主机</label>#}
+            </div>
+            <form class="form-horizontal" id="jquery_post_from" method="post" action={% url 'app_add' %}>
+                <div class="modal-body" style="margin-top: 15px">
+                    <input type="hidden" name="csrfmiddlewaretoken"
+                           value="kRaVIjNCyIT8a9V7EzT7ffeSH3avSyg7">
+                    <div class="form-group">
+                        <label class="col-sm-3 col-lg-3 control-label">{{ form.app_name_cn.label }}</label>
+                        <div class="col-sm-8 col-lg-8">{{ form.app_name_cn }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 col-lg-3 control-label">{{ form.app_name_en.label }}</label>
+                        <div class="col-sm-8 col-lg-8">{{ form.app_name_en }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 col-lg-3 control-label">{{ form.app_type.label }}</label>
+                        <div class="col-sm-8 col-lg-8">{{ form.app_type }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 col-lg-3 control-label">{{ form.git_url.label }}</label>
+                        <div class="col-sm-8 col-lg-8">{{ form.git_url }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 col-lg-3 control-label">{{ form.git_properties.label }}</label>
+                        <div class="col-sm-8 col-lg-8">{{ form.git_properties }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 col-lg-3 control-label">{{ form.java_version.label }}</label>
+                        <div class="col-sm-8 col-lg-8">{{ form.java_version }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 col-lg-3 control-label">{{ form.platform.label }}</label>
+                        <div class="col-sm-8 col-lg-8">{{ form.platform }}</div>
+                    </div>
+
+
+                    <div style="text-align:center">
+                        <button id="reset" class="btn btn-white" type="cancel"> 重置</button>
+                        <button type="submit" class="btn btn-primary"> 提交</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- 编辑服务器模态框（Modal） -->
+    <div class="modal inmodal" id="editInfoModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h3 class="control-label col-sm-3 col-lg-3" id="editModalLabel">
+                        编辑应用信息
+                    </h3>
+                </div>
+                <div class="modal-body" style="margin-top: 15px">
+                    <form class="form-horizontal" id="jquery_post_from" method="post" action="">
+                        <input type="hidden" name="csrfmiddlewaretoken"
+                               value="kRaVIjNCyIT8a9V7EzT7ffeSH3avSyg7">
+                        <div class="hidden">
+                            <label for="edit_Id" class="control-label col-sm-3 col-lg-3">应用Id</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <input type="text" class="form-control" id="app_id" name="app_id" value={{ i.id }}>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 col-lg-3 control-label">{{ form.app_name_cn.label }}</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <input class="form-control" id="app_name_cn" name="app_name_cn" maxlength="100" type="text" value={{ i.app_name_cn }}>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 col-lg-3 control-label">{{ form.app_name_en.label }}</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <input class="form-control" id="app_name_en" name="app_name_en" maxlength="100" type="text" value={{ i.app_name_en }}>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 col-lg-3 control-label">{{ form.app_type.label }}</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <input class="form-control" id="app_type" name="app_type" maxlength="100" type="text" value={{ i.app_type }}>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 col-lg-3 control-label">{{ form.git_url.label }}</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <input class="form-control" id="git_url" name="git_url" maxlength="100" type="text" value={{ i.git_url }}>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 col-lg-3 control-label">{{ form.git_properties.label }}</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <input class="form-control" id="git_properties" name="git_properties" maxlength="100" type="text"
+                                       value={{ i.git_properties }}>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 col-lg-3 control-label">{{ form.java_version.label }}</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <select id="edit_java_version" name="edit_java_version" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 col-lg-3 control-label">{{ form.platform.label }}</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <select id="edit_platform" name="edit_platform" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <div style="text-align:center">
+                        <button id="reset" class="btn btn-white" type="cancel"> 重置</button>
+                        <button id="editSave" class="btn btn-primary"> 提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

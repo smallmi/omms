@@ -1,0 +1,151 @@
+<!-- 新增服务器模态框（Modal） -->
+<div class="modal inmodal" id="addInfoModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated fadeIn">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h3 class="control-label col-sm-3 col-lg-3" id="addModalLabel">
+                    新增信息
+                </h3>
+                {#                        <label for="add_ProjectName" class="control-label col-sm-3 col-lg-3">新增主机</label>#}
+            </div>
+            <form class="form-horizontal" id="jquery_post_from" method="post" action={% url 'server_add' %}>
+                <div class="modal-body" style="margin-top: 15px">
+                    <input type="hidden" name="csrfmiddlewaretoken"
+                           value="kRaVIjNCyIT8a9V7EzT7ffeSH3avSyg7">
+{#                    <div class="form-group">#}
+{#                        <label class="col-sm-3 col-lg-3 control-label">{{ form.project_name.label }}</label>#}
+{#                        <div class="col-sm-8 col-lg-8">{{ form.project_name }}</div>#}
+{#                    </div>#}
+{##}
+{#                    <div class="form-group">#}
+{#                        <label class="col-sm-3 col-lg-3 control-label">{{ form.service_name.label }}</label>#}
+{#                        <div class="col-sm-8 col-lg-8">{{ form.service_name }}</div>#}
+{#                    </div>#}
+
+                    <div class="form-group">
+                        <label class="col-sm-3 col-lg-3 control-label">{{ form.in_ip.label }}</label>
+                        <div class="col-sm-8 col-lg-8">{{ form.in_ip }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 col-lg-3 control-label">{{ form.ex_ip.label }}</label>
+                        <div class="col-sm-8 col-lg-8">{{ form.ex_ip }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="add_Group" class="control-label col-sm-3 col-lg-3">资产属组</label>
+                        <div class="col-sm-8 col-lg-8">
+                            <select data-placeholder="选择资产组" id="groups" class="chosen-select" name="groups"
+                                    multiple="multiple" style="width: 350px; display: none;" tabindex="-1">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 col-lg-3 control-label">{{ form.system_user.label }}</label>
+                        <div id="idc" class="col-sm-8 col-lg-8">{{ form.system_user }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 col-lg-3 control-label">{{ form.idc.label }}</label>
+                        <div id="idc" class="col-sm-8 col-lg-8">{{ form.idc }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 col-lg-3 control-label">{{ form.app_project.label }}</label>
+                        <div id="app_project" class="col-sm-8 col-lg-8">{{ form.app_project }}</div>
+                    </div>
+
+                    <div style="text-align:center">
+                        <button id="reset" class="btn btn-white" type="cancel"> 重置</button>
+                        <button type="submit" class="btn btn-primary"> 提交</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- 编辑服务器模态框（Modal） -->
+    <div class="modal inmodal" id="editInfoModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h3 class="control-label col-sm-3 col-lg-3" id="editModalLabel">
+                        编辑信息
+                    </h3>
+                </div>
+                <div class="modal-body" style="margin-top: 15px">
+                    <form class="form-horizontal" id="jquery_post_from" method="post" action="">
+                        <input type="hidden" name="csrfmiddlewaretoken"
+                               value="kRaVIjNCyIT8a9V7EzT7ffeSH3avSyg7">
+                        <div class="hidden">
+                            <label for="edit_Id" class="control-label col-sm-3 col-lg-3">项目Id</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <input type="text" class="form-control" id="server_id" name="server_id" value={{ i.id }}>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 col-lg-3 control-label">{{ form.in_ip.label }}</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <input class="form-control" disabled="disabled" id="in_ip" name="in_ip" maxlength="100" type="text" value={{ i.in_ip }}>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 col-lg-3 control-label">{{ form.ex_ip.label }}</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <input class="form-control" id="ex_ip" name="ex_ip" maxlength="100" type="text" value={{ i.ex_ip }}>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_Group" class="control-label col-sm-3 col-lg-3">资产属组</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <select data-placeholder="选择资产组" id="edit_groups" class="chosen-select" name="edit_groups"
+                                        multiple="multiple" style="width: 350px; display: none;" tabindex="-1">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 col-lg-3 control-label">{{ form.system_user.label }}</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <select id="edit_system_user" name="edit_system_user" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 col-lg-3 control-label">{{ form.idc.label }}</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <select id="edit_idc" name="edit_idc" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 col-lg-3 control-label">{{ form.app_project.label }}</label>
+                            <div class="col-sm-8 col-lg-8">
+                                <select id="edit_app" name="edit_app" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <div style="text-align:center">
+                        <button id="reset" class="btn btn-white" type="cancel"> 重置</button>
+                        <button id="editSave" class="btn btn-primary"> 提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

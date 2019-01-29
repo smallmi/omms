@@ -1,0 +1,308 @@
+{% load accounts_tag %}
+{% for i in content %}
+    <tr class="gradeA odd" role="row" id="{{ i.id }}">
+        <td class="sorting_1">{{ forloop.counter }}</td>
+        <td class="center">{{ i.in_ip }}</td>
+{#        <td><a href="/fms/detail/{{ i.id }}">{{ i.host_name }}</a></td>#}
+        <td>
+            <a name="host_name" class="text-info" href="#">{{ i.host_name }}</a>
+            <input type="hidden" value="{{ i.os_version }}&
+                                                            {{ i.os_kernel }}&{{ i.cpu_model }}&
+                                                            {{ i.cpu_count }}&{{ i.cpu_cores }}&
+                                                            {{ i.mem }}&{{ i.disk }}&
+                                                            {{ i.max_open_files }}&
+                                                            {{ i.uptime }}&
+                                                            {{ i.ex_ip }}">
+        </td>
+        <td class="center">{{ i.app_project.app_name_cn }}</td>
+        <td class="center">{{ i.idc }}</td>
+        <td class="center">{{ i.app_project.app_name_en }}</td>
+{#                <td class="center">{{ i.status }}</td>#}
+        <td>
+            {% if i.status %}
+                <span><img src="/static/img/Up.gif">UP</span>
+            {% else %}
+                <span style=""><img src="/static/img/Down.gif">DOWN</span>
+            {% endif %}
+        </td>
+        <td class="center">{{ i.author.fullname }}</td>
+        <td class="center">{{ i.ctime }}</td>
+
+        <td class="center">
+{#            <a id="edit_Id_{{i.id}}" class="btn btn-xs btn-success btn-edit" data-toggle="modal" value="编辑" onclick="get_edit_info(this)" data-target="#editInfoModal">编辑</a>#}
+            <button data-row="{{ i.id }}|{{ i.project_name }}|{{ i.service_name }}|{{ i.in_ip }}|{{ i.ex_ip }}|{{ i.groups.all | grouptostr }}|{{ i.idc_id }}|{{ i.app_project_id }}|{{ i.system_user_id }}" class="btn btn-xs btn-success btn-edit" data-toggle="modal" data-target="#editInfoModal">编辑</button>
+
+            {#            <a class="btn btn-xs btn-primary btn-email" data-toggle="modal" data-target="#editor"#}
+{#               data-row={{ i.id }}|{{ i.author.fullname }}>更新</a>#}
+            <a class="btn btn-xs btn-default" id="server_update_{{i.id}}">刷新</a>
+{#            <a href=/fms/edit?id={{ i.id }} class="btn btn-xs btn-danger btn-edit">删除</a>#}
+            <a class="btn btn-xs btn-danger" id="server_delete_{{i.id}}">删除</a>
+            <a type="button" class="btn btn-primary btn-xs bt-webssh">终端</a>
+        </td>
+    </tr>
+
+
+{#    <script type="text/javascript">#}
+{#        /**#}
+{#         * 编辑表单#}
+{#         * **/#}
+{##}
+{#        $('.btn-edit').on('click', function (event) {#}
+{##}
+{#            var groups = {{ groups | safe}};#}
+{#            var idcs ={{ idcs | safe}};#}
+{#            var apps = {{ apps | safe }};#}
+{#            var users = {{ users | safe }};#}
+{##}
+{##}
+{#            var btn = $(event.target);#}
+{#            var row = btn.data('row').split('|');#}
+{##}
+{#            $('#server_id').val(row[0]);#}
+{#            $('#project_name').val(row[1]);#}
+{#            $('#service_name').val(row[2]);#}
+{#            $('#in_ip').val(row[3]);#}
+{#            $('#ex_ip').val(row[4]);#}
+{##}
+{#            $('#edit_idc').empty();#}
+{#            $('#edit_groups').empty();#}
+{#            $('#edit_app').empty();#}
+{#            $('#edit_system_user').empty();#}
+{##}
+{#            var idc = row[6];#}
+{#            var app = row[7];#}
+{#            var user = row[8];#}
+{#            $('#edit_system_user').append("<option value=''>----------</option>");#}
+{#            jQuery.each(users,function (key, value) {#}
+{#                var t = jQuery("<option value=" + value[0]+">" + value[1] +"（" + value[2] + "）" + "</option>");#}
+{#               if(value[0] == user){#}
+{#                    t.attr("selected","selected");#}
+{#               }#}
+{#                $('#edit_system_user').append(t);#}
+{#            });#}
+{##}
+{#            $('#edit_idc').append("<option value=''>----------</option>");#}
+{#            jQuery.each(idcs, function (key, value) {#}
+{#                var t = jQuery("<option value=" + value[0] + ">" + value[1] + "</option>");#}
+{#                if (value[0] == idc) {#}
+{#                    t.attr("selected", "selected");#}
+{#                }#}
+{#                $('#edit_idc').append(t);#}
+{#            });#}
+{##}
+{#            $('#edit_app').append("<option value=''>----------</option>");#}
+{#            jQuery.each(apps, function (key, value) {#}
+{#                var t = jQuery("<option value=" + value[0]+">" + value[1] +"（" + value[2] + "）" + "</option>");#}
+{#                if (value[0] == app) {#}
+{#                    t.attr("selected", "selected");#}
+{#                }#}
+{#                $('#edit_app').append(t);#}
+{#            });#}
+{##}
+{##}
+{#            row_group = row[5].split(',');#}
+{#            if (groups != "") {#}
+{#                $.each(groups, function (key, value) {#}
+{#                    var obj = document.getElementById("edit_groups");#}
+{#                    var op = new Option(value[1], value[0])#}
+{#                    if (row_group.contains(value[1])) {#}
+{#                        op.selected = true;#}
+{#                    }#}
+{#                    obj.add(op);#}
+{#                });#}
+{#            } else if (groups == "") {#}
+{##}
+{#                $.each(groups, function (key, value) {#}
+{#                    var obj = document.getElementById("edit_groups");#}
+{#                    var op = new Option(value[1], value[0])#}
+{#                    obj.add(op);#}
+{#                });#}
+{#            }#}
+{#            resetChosen();#}
+{#        });#}
+{##}
+{#        $('.bt-webssh').click(function () {#}
+{#            var id = $(this).parent().parent().attr('id');#}
+{#            $.ajax({#}
+{#                url: "/cmdb/server_webssh/",#}
+{#                type: 'POST',#}
+{#                data: {'id': id},#}
+{#                success: function (ret) {#}
+{##}
+{#                    var obj = JSON.parse(ret);#}
+{#                    var ip = obj.ip;#}
+{#                    var username = obj.username;#}
+{#                    var password = obj.password;#}
+{##}
+{#                    $.ajax({#}
+{#                        url: "http://192.168.201.52:8088/console/login?rnd=" + Math.random(),#}
+{#                        method: "POST",#}
+{#                        data: {#}
+{#                            "vm_addr": ip,#}
+{#                            "user_name": username,#}
+{#                            "user_pwd": password#}
+{#                        },#}
+{#                        dataType: "jsonp",#}
+{#                        jsonp: 'callback',#}
+{#                        jsonpCallback: "callback",#}
+{#                        cache: false,#}
+{#                        contentType: "application/json;utf-8", /*设置返回类型*/#}
+{#                        async: false#}
+{#                    }).done(function (data) {#}
+{#                        var json = (data);#}
+{#                        if (json.ok) {#}
+{#                            window.open("http://192.168.201.52:8088" + json.data,"_blank ");#}
+{#                        } else {#}
+{#                            alert("登陆失败，请确认您的登陆信息。");#}
+{#                        }#}
+{#                    }).fail(function () {#}
+{#                        alert("未知失败，请联系管理员。");#}
+{#                    });#}
+{#                }#}
+{#            })#}
+{#        });#}
+{##}
+{#    </script>#}
+{##}
+{##}
+{#    <script>#}
+{#        /*#}
+{#        *主机基本信息提示#}
+{#        */#}
+{#        $("table tbody tr td a[name='host_name']").each(function () {#}
+{#            var content = $(this).next().val().split('&');//获取隐藏的主机基本信息内容#}
+{#            console.log($(this))#}
+{#            var arr = new Array();#}
+{#            arr.push("<div><span>系统版本</span>&nbsp&nbsp&nbsp&nbsp" + "<span style='float:right'>" + content[0] + "</span></div>")#}
+{#            arr.push("<div><span>系统内核</span>&nbsp&nbsp&nbsp&nbsp" + "<span style='float:right'>" + content[1] + "</span></div>")#}
+{#            arr.push("<div><span>CPU型号</span>&nbsp&nbsp&nbsp&nbsp" + "<span style='float:right'>" + content[2] + "</span></div>")#}
+{#            arr.push("<div><span>CPU个数</span>&nbsp&nbsp&nbsp&nbsp" + "<span style='float:right'>" + content[3] + "</span></div>")#}
+{#            arr.push("<div><span>CPU核数</span>&nbsp&nbsp&nbsp&nbsp" + "<span style='float:right'>" + content[4] + "</span></div>")#}
+{#            arr.push("<div><span>内存</span>&nbsp&nbsp&nbsp&nbsp" + "<span style='float:right'>" + content[5] + " M</span></div>")#}
+{#            arr.push("<div><span>硬盘</span>&nbsp&nbsp&nbsp&nbsp" + "<span style='float:right'>" + content[6] + "</span></div>")#}
+{#            arr.push("<div><span>最大文件打开数</span>&nbsp&nbsp&nbsp&nbsp" + "<span style='float:right'>" + content[7] + "</span></div>")#}
+{#            arr.push("<div><span>运行时间</span>&nbsp&nbsp&nbsp&nbsp" + "<span style='float:right'>" + content[8] + " 天</span></div>")#}
+{#            arr.push("<div><span>外网IP</span>&nbsp&nbsp&nbsp&nbsp" + "<span style='float:right'>" + content[9] + "</span></div>")#}
+{#            new_cont = arr.join('');#}
+{#            tips($(this), new_cont, 'auto', 'auto', 1);#}
+{#        });#}
+{##}
+{#        /*#}
+{#       *小tips,鼠标悬停提示#}
+{#       */#}
+{#        function tips(element, content, width, height, direction, colour) {#}
+{#            height = height || 'auto';#}
+{#            width = width || 'auto';#}
+{#            direction = direction || 1;//提示层默认在上方出现#}
+{#            colour = colour || '#3595CC';#}
+{#            element.hover(#}
+{#                function tips() {#}
+{#                    index = layer.tips(content, element, {#}
+{#                        tips: [direction, colour],#}
+{#                        time: 100000000000,#}
+{#                        area: [width, height]#}
+{#                    });#}
+{#                },#}
+{#                function () {#}
+{#                    layer.closeAll('tips');#}
+{#                }#}
+{#            );#}
+{#        }#}
+{##}
+{##}
+{#        /*#}
+{#*更新机器信息#}
+{#*/#}
+{#        $("table tbody tr td a[id^='server_update']").click(function () {#}
+{#            var id_val = $(this).attr('id'); //获取更新按钮id值#}
+{#            var id = id_val.split('_')[2]; //获取id值的最后一位#}
+{#            var data = {"id": id};#}
+{#            data = JSON.stringify(data);#}
+{#            var url = "/cmdb/flushAllHosts/";#}
+{##}
+{#            $.get(url, {data: data}, function (msg) {#}
+{#                ajax_callback(msg);#}
+{#            });#}
+{#        });#}
+{##}
+{##}
+{#        /*#}
+{#        *删除机器信息#}
+{#        */#}
+{#        $("table tbody tr td a[id^='server_delete']").click(function () {#}
+{#            var id_val = $(this).attr('id');#}
+{#            var id = id_val.split('_')[2];#}
+{#            var data = {"id": id};#}
+{#            data = JSON.stringify(data);#}
+{#            var url = "/cmdb/server_delete/";#}
+{##}
+{#            var index = layer.confirm('确定删除吗？', {#}
+{#                btn: ['确定', '取消'] //按钮#}
+{#            }, function () {#}
+{#                $.post(url, {data: data}, function (msg) {#}
+{#                    ajax_callback(msg);#}
+{#                });#}
+{#            }, function () {#}
+{#                layer.close(index)#}
+{#            });#}
+{#        });#}
+{##}
+{##}
+{#        /*#}
+{#        *保存编辑服务器信息数据#}
+{#        */#}
+{#        $('#editSave').click(function () {#}
+{#            var server_id = $("#server_id").val();#}
+{#            var in_ip = $("#in_ip").val();#}
+{#            var ex_ip = $("#ex_ip").val();#}
+{#            var project_name = $("#project_name").val();#}
+{#            var service_name = $("#service_name").val();#}
+{#            var groups = $("#edit_groups").val();#}
+{#            var idc = $("#edit_idc").find("option:selected").val();#}
+{#            var app = $("#edit_app").find("option:selected").val();#}
+{#            var user = $("#edit_system_user").find("option:selected").val();#}
+{#            data = {#}
+{#                "project_name": project_name,#}
+{#                "service_name": service_name,#}
+{#                "in_ip": in_ip,#}
+{#                "ex_ip": ex_ip,#}
+{#                "groups": groups,#}
+{#                "idc": idc,#}
+{#                "app": app,#}
+{#                "user": user,#}
+{#                "id": server_id#}
+{#            };#}
+{#            data = JSON.stringify(data);#}
+{#            var url = "/cmdb/server_edit/";#}
+{##}
+{#            $.post(url, {data: data}, function (msg) {#}
+{#                $('#editInfoModal').modal('hide')#}
+{#                ajax_callback(msg);#}
+{#            });#}
+{#        });#}
+{##}
+{#        /*#}
+{#        *ajax get callback#}
+{#        */#}
+{#        function ajax_callback(msg) {#}
+{#            var msg = $.parseJSON(msg);#}
+{#            var index = layer.alert(msg, { //layer控件提示信息#}
+{#                skin: 'layui-layer-molv' //样式类名#}
+{#            }, function () {#}
+{#                if (msg == '成功') {#}
+{#                    window.location = "/cmdb/server_list/";#}
+{#                }#}
+{#                else if (msg == '失败') {#}
+{#                    window.location = "/cmdb/server_list/";#}
+{#                }#}
+                    {#        else if (msg == '无权限操作'){#}
+                    {#            window.location="/cmdb/server_list/";#}
+                    {#        }#}
+{#                else {#}
+{#                    layer.close(index)#}
+{#                }#}
+{#            });#}
+{#        }#}
+{##}
+{#    </script>#}
+{% endfor %}

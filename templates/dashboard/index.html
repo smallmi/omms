@@ -1,0 +1,236 @@
+{% extends 'base/base_site.html' %} 
+
+{% block content %}
+{#<div class="ibox-title">#}
+{#  <h5>仪表盘</h5>#}
+{#</div>#}
+<div class="wrapper-content">
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-success pull-right">Users</span>
+                    <h5>用户总数</h5>
+                </div>
+                <div class="ibox-content">
+                    <h1 class="no-margins"><a href="">{{ users_count }}</a></h1>
+                    <small>All user</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-info pull-right">Hosts</span>
+                    <h5>主机总数</h5>
+                </div>
+                <div class="ibox-content">
+                    <h1 class="no-margins"><a href="{% url 'server_list' %}">{{ hosts_count }}</a></h1>
+                    <small>All host</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-primary pull-right">Platform</span>
+                    <h5>平台数量</h5>
+                </div>
+                <div class="ibox-content">
+                    <h1 class="no-margins"><a href="{% url 'app_platform' %}"> <span id="online_users"></span>{{ platform_count }}</a></h1>
+                    <small>All platform</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-warning pull-right">App</span>
+                    <h5>应用数量</h5>
+                </div>
+                <div class="ibox-content">
+                        <h1 class="no-margins"><a href="{% url 'app_list' %}"> <span id="online_hosts"></span>{{ app_count }}</a></h1>
+                    <small>All app</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <HR style="" width="90%">
+
+    <div class="row">
+
+        <div class="col-lg-12">
+            <div id="platform_one" style="height:400px;"></div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super}}
+<script src="/static/js/plugins/echart/echarts.js"></script>
+{#<script src="/static/js/plugins/echart/pie.js"></script>#}
+{#<script src="/static/js/plugins/echart/line.js"></script>#}
+<script src="/static/js/plugins/echart/tree.js"></script>
+
+
+    <script type="text/javascript">
+        var platform_one_Chart = echarts.init(document.getElementById('platform_one'));
+        platform_one_Chart.showLoading();
+
+        var data1 = {
+            "name": "支付",
+            "children": [
+                {
+                    "name": "监控系统",
+                    "children":[
+                        {
+                            "name": "192.168.203.85",
+                        },
+                        {
+                            "name": "192.168.203.91",
+                        },
+                    ]
+                },
+            ]
+        };
+
+        var data2 = {
+            "name": "运维",
+            "children": [
+                {
+                    "name": "小瓶盖测试",
+                    "children":[
+                        {
+                            "name": "192.168.201.52",
+                        },
+                        {
+                            "name": "192.168.201.53",
+                        },
+                    ]
+                },
+                {
+                    "name": "运维管理系统",
+                    "children":[
+                        {
+                            "name": "192.168.201.52",
+                        },
+                    ]
+                },
+                {
+                    "name": "gitlab备份机",
+                    "children":[
+                        {
+                            "name": "192.168.200.253",
+                        },
+                    ]
+                }
+            ]
+        };
+
+        platform_one_Chart.hideLoading();
+
+        var platform_option = {
+            tooltip: {
+                trigger: 'item',
+                triggerOn: 'mousemove'
+            },
+            legend: {
+                top: '2%',
+                left: '3%',
+                orient: 'vertical',
+                data: [{
+                    name: '支付',
+                    icon: 'rectangle'
+                },
+                    {
+                        name: '运维',
+                        icon: 'rectangle'
+                    }],
+                borderColor: '#c23531'
+            },
+            series: [
+                {
+                    type: 'tree',
+
+                    name: '支付',
+
+                    data: [data1],
+
+                    top: '5%',
+                    left: '7%',
+                    bottom: '2%',
+                    right: '60%',
+
+                    symbolSize: 7,
+
+                    label: {
+                        normal: {
+                            position: 'left',
+                            verticalAlign: 'middle',
+                            align: 'right'
+                        }
+                    },
+
+                    leaves: {
+                        label: {
+                            normal: {
+                                position: 'right',
+                                verticalAlign: 'middle',
+                                align: 'left'
+                            }
+                        }
+                    },
+
+                    expandAndCollapse: true,
+
+                    animationDuration: 550,
+                    animationDurationUpdate: 750
+
+                },
+                {
+                    type: 'tree',
+                    name: '运维',
+                    data: [data2],
+
+                    top: '20%',
+                    left: '60%',
+                    bottom: '22%',
+                    right: '18%',
+
+                    symbolSize: 7,
+
+                    label: {
+                        normal: {
+                            position: 'left',
+                            verticalAlign: 'middle',
+                            align: 'right'
+                        }
+                    },
+
+                    leaves: {
+                        label: {
+                            normal: {
+                                position: 'right',
+                                verticalAlign: 'middle',
+                                align: 'left'
+                            }
+                        }
+                    },
+
+                    expandAndCollapse: true,
+
+                    animationDuration: 550,
+                    animationDurationUpdate: 750
+                }
+            ]
+        };
+
+        platform_one_Chart.setOption(platform_option);
+    </script>
+{% endblock %}

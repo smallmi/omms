@@ -1,0 +1,204 @@
+{% extends 'base/base_site.html' %}
+{% block css %}
+    {{ block.super }}
+{% endblock %}
+{% block content %}
+    <div class="ibox-title" style="background-color:#E8FFF5">
+        <h5>监控详情</h5>
+    <h6 align="center">友情提醒：内存、磁盘、Swap显示均为百分比（%）</h6>
+    </div>
+    <div class="ibox-content">
+        <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper form-inline">
+            <div class="row">
+                <div class="col-sm-3">
+                    <div class="dataTables_length" id="DataTables_Table_0_length" style="margin-bottom:15px;">
+                        {{ request.perms.List }}
+                        <a class="btn btn-sm btn-warning"> Search</a>
+                        <input type="text" placeholder="搜索: 服务、名称、IP等" id="search" class="form-control input-sm">
+                    </div>
+                </div>
+                <div class="col-sm-7">
+                    <div class="col-sm-2">
+                        <a class="btn btn-sm btn-success">在线机器：{{ online }}</a>
+                    </div>
+                    <div class="col-sm-3">
+                        <a class="btn btn-sm btn-danger">连通性异常：{{ offline }}</a>
+                    </div>
+                    <div class="col-sm-2">
+                        <a class="btn btn-sm btn-warning">内存警告：{{ mem_warn }}</a>
+                    </div>
+                    <div class="col-sm-2">
+                        <a class="btn btn-sm btn-warning">磁盘警告：{{ disk_warn }}</a>
+                    </div>
+                    <div class="col-sm-2">
+                        <a class="btn btn-sm btn-warning">Swap警告：{{ swap_warn }}</a>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <a class="btn btn-sm btn-default btn-flush">批量刷新</a>
+                </div>
+            </div>
+            <table class="table table-striped table-bordered table-hover dataTables-example dataTable dtr-inline"
+                   id="DataTables_Table_0" role="grid" aria-describedby="DataTables_Table_0_info">
+                <thead>
+                <tr role="row">
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" aria-sort="ascending">序号
+                    </th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">IP</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">平台名称</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">服务名称</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">内存</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">磁盘</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">Swap</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">健康状态</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">操作</th>
+
+                </tr>
+                </thead>
+                <tbody id="content">
+                {% include 'monitor/server_table.html' %}
+                </tbody>
+            </table>
+
+            {% include 'common/paginator.html' %}
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ block.super }}
+
+    <script type="text/javascript">
+        function resetChosen() {
+            var config = {
+                '.chosen-select': {
+                    width: "100%"
+                },
+                '.chosen-select-deselect': {
+                    allow_single_deselect: true
+                },
+                '.chosen-select-no-single': {
+                    disable_search_threshold: 10
+                },
+                '.chosen-select-no-results': {
+                    no_results_text: 'Oops, nothing found!'
+                },
+                '.chosen-select-width': {
+                    width: "100%"
+                },
+
+            }
+            for (var selector in config) {
+                $(selector).chosen(config[selector]);
+            }
+            $('#groups').trigger("chosen:updated");
+            $('#edit_groups').trigger("chosen:updated");
+        }
+
+        Array.prototype.contains = function (needle) {
+            for (i in this) {
+                if (this[i] == needle) return true;
+            }
+            return false;
+        }
+    </script>
+
+    <script type="text/javascript">
+
+         /**
+         * 刷新主机信息
+         * **/
+
+        $('.btn-flush').on('click', function () {
+            var url = "/monitor/flushMonitorInfo/"
+            $.get(url, function (msg) {
+                ajax_callback(msg);
+            });
+        });
+
+    </script>
+
+    <script>
+{##}
+{#        /*#}
+{#*更新机器信息#}
+{#*/#}
+{#        $("table tbody tr td a[id^='server_update']").click(function () {#}
+{#            var id_val = $(this).attr('id'); //获取更新按钮id值#}
+{#            var id = id_val.split('_')[2]; //获取id值的最后一位#}
+{#            var data = {"id": id};#}
+{#            data = JSON.stringify(data);#}
+{#            var url = "/cmdb/postmachineinfo/";#}
+{##}
+{#            $.get(url, {data: data}, function (msg) {#}
+{#                ajax_callback(msg);#}
+{#            });#}
+{#        });#}
+{##}
+
+        /*
+        *ajax get callback
+        */
+        function ajax_callback(msg) {
+            var msg = $.parseJSON(msg);
+            var index = layer.alert(msg, { //layer控件提示信息
+                skin: 'layui-layer-molv' //样式类名
+            }, function () {
+                if (msg == '成功') {
+                    window.location = "/monitor/monitor_list/";
+                } else if (msg == '失败') {
+                    window.location = "/monitor/monitor/";
+                }
+                    {#        else if (msg == '无权限操作'){#}
+                    {#            window.location="/cmdb/server_list/";#}
+                    {#        }#}
+                else {
+                    layer.close(index)
+                }
+            });
+        }
+
+    </script>
+    <!-- 实时搜索 -->
+    <script type="text/javascript">
+        var flag;
+
+        function func1() {
+            clearTimeout(flag);
+            flag = setTimeout(function () {
+                data();
+            }, 200);
+
+        }
+
+        function data() {
+            search = $('#search').val();
+            $.ajax({
+                url: '{% url 'monitor_search' %}',
+                type: 'GET',
+                dataType: 'html',
+                data: {"search": search},
+                success: function (data) {
+                    $("#content").html(data);
+                }
+            });
+        }
+
+        $("#search").keyup(function (event) {
+            func1();
+        });
+    </script>
+    <!-- 实时搜索End -->
+
+
+    <script type="text/javascript">
+        function reset() {
+            $('#email').val("");
+        }
+
+        String.prototype.bool = function () {
+            return (/^true$/i).test(this);
+        };
+    </script>
+
+
+{% endblock %}
