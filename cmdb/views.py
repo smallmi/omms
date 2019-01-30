@@ -71,7 +71,7 @@ def server_list(request):
 
 
 @login_required
-@permission_required('cmdb.view_servergroup', raise_exception=True)
+@permission_required('cmdb.view_serverGroup', raise_exception=True)
 def server_group(request):
     group = ServerGroup.objects.annotate(average_server=Count('servers')).order_by('id')
     data = paginator(request, group)
@@ -230,7 +230,7 @@ def group_add(request):
     # 新增资产组
     response = HttpResponse()
 
-    if check_perms(request, 'cmdb.add_servergroup', raise_exception=True):
+    if check_perms(request, 'cmdb.add_serverGroup', raise_exception=True):
         if request.method == "POST":
             user = request.user
             data = json.loads(request.POST.get('data', ''))
@@ -382,7 +382,7 @@ def server_webssh(request):
 def group_edit(request):
     # 编辑机器
     response = HttpResponse()
-    if check_perms(request, 'cmdb.change_servergroup', raise_exception=True):
+    if check_perms(request, 'cmdb.change_serverGroup', raise_exception=True):
         data = json.loads(request.POST.get('data', ''))
 
         id = data['id']
@@ -456,7 +456,7 @@ def group_delete(request):
     # 删除资产组
     response = HttpResponse()
 
-    if check_perms(request, 'cmdb.delete_servergroup', raise_exception=True):
+    if check_perms(request, 'cmdb.delete_serverGroup', raise_exception=True):
         data = json.loads(request.POST.get('data', ''))
 
         id = int(data['id'])

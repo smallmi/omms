@@ -36,7 +36,7 @@ def index(request):
 
 
 @login_required
-@permission_required('monitor.view_monitor', raise_exception=True)
+@permission_required('cmdb.view_monitor', raise_exception=True)
 def monitor_list(request):
     server = Server.objects.order_by('id')
     platforms = Platform.objects.values_list('id', 'name')
@@ -74,7 +74,7 @@ def monitor_list(request):
 
 
 @login_required
-@permission_required('monitor.view_monitor', raise_exception=True)
+@permission_required('cmdb.view_monitor', raise_exception=True)
 def monitor_graph(request):
     data = {}
     request.breadcrumbs((('首页', '/'), ('监控概况', reverse('monitor_graph'))))
