@@ -1,12 +1,12 @@
 OMMS 运维监控管理系统
 =======================
 
-[![Python Version](https://img.shields.io/badge/Python--3.6-paasing-green.svg)](https://img.shields.io/badge/Python--3.6-paasing-green.svg)
-[![Django Version](https://img.shields.io/badge/Django--1.11.0-paasing-green.svg)](https://img.shields.io/badge/Django--1.11.0-paasing-green.svg)
+[![Python Version](https://img.shields.io/badge/Python--3.6.2-paasing-green.svg)](https://img.shields.io/badge/Python--3.6.2-paasing-green.svg)
+[![Django Version](https://img.shields.io/badge/Django--2.1.5-paasing-green.svg)](https://img.shields.io/badge/Django--2.1.5-paasing-green.svg)
 
 项目作者：小瓶盖
 
-> OMMS现有功能: （QQ交流群：374506612）
+> OMMS现有功能: （扫描下方微信邀请入群，请备注姓名@公司）
 
 - Dashboard
 - 资产管理
@@ -123,6 +123,6 @@ admin admin
 <img src="https://images.gitee.com/uploads/images/2019/0129/172138_4a5aa6bc_1521920.jpeg" width="220" height="220" alt="支付宝赞赏码" style="float: left;"/>
 
 
-可以通过主站搜索淘宝优惠券领券购物，可以省不少钱哦！主站：http://www.smallmi.com 
+可以通过主站搜索淘宝优惠券领券购物，可以省不少钱哦！主站：http://www.smallmi.com
 
 项目演示：http://demo.smallmi.com
