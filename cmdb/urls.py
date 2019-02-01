@@ -66,4 +66,7 @@ urlpatterns = [
     url(r'^postmachineinfo/$', views.postmachineinfo, name='postmachineinfo'),
     url(r'^flushAllHosts/$', views.flushAllHosts, name='flushAllHosts'),
 
+
+    url(r'^upload_hosts/$', views.upload_hosts, name='upload_hosts'),
+
 ]

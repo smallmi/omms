@@ -78,8 +78,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=40, unique=True, verbose_name=u'用户名')
     first_name = models.CharField(max_length=40, null=True, verbose_name=u'姓')
     last_name = models.CharField(max_length=40, null=True, verbose_name=u'名')
-    email = models.EmailField(max_length=100, unique=True, verbose_name=u'邮箱')
-    mobile = models.CharField((u'手机'), max_length=30, blank=False,
+    email = models.EmailField(max_length=100, null=True, verbose_name=u'邮箱')
+    mobile = models.CharField((u'手机'), max_length=30, null=True, blank=False,
                               validators=[validators.RegexValidator(r'^[0-9+()-]+$',
                                                                     ('Enter a valid mobile number.'),
                                                                     'invalid')])

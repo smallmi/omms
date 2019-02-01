@@ -3,6 +3,7 @@
     Author: smallmi
     Blog: http://www.smallmi.com
 '''
+import os
 
 from django.db.models import Count
 from django.shortcuts import render_to_response
@@ -10,7 +11,7 @@ from django.template import RequestContext
 from django.urls import reverse
 
 from cmdb.forms import ServerForm, SystemUserForm
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from commons.paginator import paginator
 from cmdb.models import *
@@ -558,8 +559,8 @@ def postmachineinfo(request):
 
         infoList = get_host_info(assets)
 
-        if not infoList:
-            response.write(json.dumps(u'没有数据返回'))
+        if not infoList[0]['status']:
+            response.write(json.dumps(u'主机网络不可达'))
         else:
             for data in infoList:
                 if data['status']:
@@ -588,7 +589,7 @@ def postmachineinfo(request):
 
 
             # set_service_port(server)  # 设置服务端口信息
-            response.write(json.dumps(u'成功'))
+            response.write(json.dumps(u'刷新成功'))
     else:
         response.write(json.dumps(u'您没有权限操作@^@，请联系管理员！'))
 
@@ -615,7 +616,7 @@ def flushAllHosts(request):
         infoList = get_host_info(hostList)
 
         if not infoList:
-            response.write(json.dumps(u'主机不可达'))
+            response.write(json.dumps(u'批量刷新异常'))
         else:
             for data in infoList:
                 servers = Server.objects.filter(in_ip=data['ipadd_in'])
@@ -637,8 +638,27 @@ def flushAllHosts(request):
                 servers.update(uptime=data['uptime'])
 
             # set_service_port(server)  # 设置服务端口信息
-            response.write(json.dumps(u'成功'))
+            response.write(json.dumps(u'批量刷新成功'))
     else:
         response.write(json.dumps(u'您没有权限操作@^@，请联系管理员！'))
 
     return response
+
+
+@login_required
+# @permission_required('cmdb.update_server', raise_exception=True)
+def upload_hosts(request):
+    result = {"data": []}
+    response = HttpResponse()
+    response['Content-Type'] = "text/javascript"
+    hostsFile = request.FILES.getlist('hostsFile')
+    if hostsFile is not None:
+        tmpDir = os.path.dirname('/tmp/')
+        for i in hostsFile:
+            filename = os.path.join(tmpDir, i.name)
+            file = open(filename, 'wb')
+            for chrunk in i.chunks():
+                file.write(chrunk)
+            file.close()
+        result["filename"] = filename
+    return JsonResponse(result)

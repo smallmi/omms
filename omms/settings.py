@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 '''
     Author: smallmi
     Blog: http://www.smallmi.com
@@ -17,11 +17,12 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 import sys
+import ldap
+from django_auth_ldap.config import LDAPSearch
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(BASE_DIR, 'extra_apps'))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -106,6 +107,25 @@ DATABASES = {
         },
     }
 }
+
+
+# ladp的地址和端口号
+AUTH_LDAP_SERVER_URI = "ldap://192.168.201.74:389"
+
+LDAP_DOMAIN = "@oriental-finance.com"
+
+AUTH_LDAP_USER_SEARCH = LDAPSearch("DC=oriental-finance,DC=com", ldap.SCOPE_SUBTREE,
+                                   "(&(objectClass=person)(sAMAccountName=%(user)s))")
+
+
+AUTHENTICATION_BACKENDS = (
+
+    "django_auth_ldap.backend.LDAPBackend",
+
+    "django.contrib.auth.backends.ModelBackend",
+
+)
+
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators

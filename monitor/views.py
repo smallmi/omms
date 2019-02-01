@@ -114,7 +114,7 @@ def flushMonitorInfo(request):
                                    swap_free=data['swap_free'], swap_rate=data['swap_rate'])
                 else:
                     servers.update(status=data['status'])
-            response.write(json.dumps(u'成功'))
+            response.write(json.dumps(u'批量刷新成功'))
     else:
         response.write(json.dumps(u'您没有权限操作@^@，请联系管理员！'))
 
