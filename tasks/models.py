@@ -86,3 +86,20 @@ class mavenJar(models.Model):
 
     def __str__(self):
         return self.groupId
+
+
+class InstallLogTag(models.Model):
+    service = models.CharField(max_length=32, verbose_name='安装服务', null=True)
+    log_start = models.IntegerField(null=True, blank=True, verbose_name=u'日志起始位置')
+    log_end = models.IntegerField(null=True, blank=True, verbose_name=u'日志结束位置')
+    user = models.CharField(max_length=32, verbose_name='操作者', null=True)
+    ctime = models.DateTimeField(auto_now_add=True, verbose_name='时间')
+
+    class Meta:
+        permissions = (
+            ("view_install_log", ("查看安装日志")),
+        )
+        default_permissions = ()
+
+    def __str__(self):
+        return self.service

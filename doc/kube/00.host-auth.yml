@@ -1,0 +1,17 @@
+# 新增主机间的双向信任：
+# 1.先手动将deploy节点做信任，即omms部署节点。
+#   注意：如果omms是使用普通用户运行，需要普通用户信任root用户（即普通用户可以免密ssh root）
+# 2.auth-node节点需安装openssh-clients以支持ssh-copy-id命令
+# 3.需在host_list.txt文件中密码为root密码
+
+# deploy节点与auth-node节点单向信任
+- hosts:
+  - deploy
+  roles:
+  - host-auth
+
+# auth-node节点间相互信任
+#- hosts:
+#  - auth-node
+#  roles:
+#  - host-auth

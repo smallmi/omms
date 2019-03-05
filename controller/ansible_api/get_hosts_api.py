@@ -7,6 +7,9 @@
 
 from controller.ansible_api.inventory import BaseInventory
 from controller.ansible_api.runner import AdHocRunner
+import logging
+
+logger = logging.getLogger('omms')
 
 
 def init(assets):
@@ -54,7 +57,7 @@ def get_uptime(assets):
             result['host_ip'] = i['hostname']
             infoList.append(result)
         except:
-            print('检测 ' + i['hostname'] + ' 此主机网络不可达...')
+            logger.error('检测 ' + i['hostname'] + ' 此主机网络不可达...')
 
     return infoList
 
@@ -66,6 +69,7 @@ def get_host_info(assets):
     ]
     ret = runner.run(tasks, "all")
 
+    print(ret.results_raw)
     infoList = []
     for i in assets:
         try:
@@ -85,8 +89,14 @@ def get_host_info(assets):
             cpu_cores = data['ansible_processor_cores']
             mem = data['ansible_memtotal_mb']
 
-            ipadd_in = data['ansible_all_ipv4_addresses'][0]
-            disk = data['ansible_devices']['sda']['size']
+            # ipadd_in = data['ansible_all_ipv4_addresses'][0]
+            ipadd_in = data['ansible_default_ipv4']['address']
+            # disk = data['ansible_devices']['sda']['size']
+            try:
+                disk = data['ansible_devices']['sda']['size']
+            except Exception as a:
+                logger.info(i['hostname'] + ' 主机不存在{}类型磁盘，开始获取vda'.format(a))
+                disk = data['ansible_devices']['vda']['size']
 
             ansible_mounts = data['ansible_mounts']
             ansible_memory_mb_nocache = data['ansible_memory_mb']['nocache']
@@ -105,7 +115,10 @@ def get_host_info(assets):
                     pass
 
             mem_rate = "%.1f" % ((1 - (mem_free/mem_total))*100)
-            swap_rate = "%.1f" % ((1 - (swap_free / swap_total))*100)
+            if swap_total != 0:
+                swap_rate = "%.1f" % ((1 - (swap_free / swap_total))*100)
+            else:
+                swap_rate = 0
             disk_rate = "%.1f" % ((1 - (disk_free / disk_total))*100)
 
             # print sysinfo
@@ -132,11 +145,10 @@ def get_host_info(assets):
             data['disk_free'] = disk_free
 
             infoList.append(data)
-        except:
-            unreachable_dic = {}
-            unreachable_dic['ipadd_in'] = i['hostname']
-            unreachable_dic['status'] = False
-            print('检测 ' + i['hostname'] + ' 此主机网络不可达...')
+        except Exception as e:
+            logger.error('信息采集出现错误error:{}'.format(e))
+            unreachable_dic = {'ipadd_in': i['hostname'], 'status': False}
+            logger.error('检测 {} 此主机网络不可达...'.format(i['hostname']))
             infoList.append(unreachable_dic)
 
     return infoList

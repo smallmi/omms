@@ -1,22 +1,28 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 '''
     Author: smallmi
     Blog: http://www.smallmi.com
 '''
+import time
+
 import re
 
 from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
-from  django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.urls import reverse
 from django.shortcuts import render_to_response
 import subprocess
+from omms.settings import OMMS_LOG_FILE
 
 from cmdb.models import Server
 from commons.paginator import paginator
-from .models import history, toolsscript, mavenJar
+from controller.ansible_api.playbook_api import hostsPlaybook
+from .models import history, toolsscript, mavenJar, InstallLogTag
 import paramiko, json, os
 from .form import ToolForm, JarForm
+import logging
 
+logger = logging.getLogger('omms')
 
 
 def ssh(ip, port, username, password, cmd):
@@ -40,6 +46,7 @@ def ssh(ip, port, username, password, cmd):
 
 
 @login_required
+@permission_required('tasks.change_cmd', raise_exception=True)
 def cmd(request):  ##命令行
 
     request.breadcrumbs((('首页', '/'), ('脚本工具', reverse('tools')), ('命令行', reverse('cmd'))))
@@ -78,9 +85,9 @@ def cmd(request):  ##命令行
                         cmd=cmd)
                 historys = history.objects.create(ip=i.in_ip, root=i.system_user, port=22, cmd=cmd, user=user)
                 if s == None or s['data'] == '':
-                    s={}
-                    s['ip']=i.in_ip
-                    s['data']="返回值为空,可能是权限不够。"
+                    s = {}
+                    s['ip'] = i.in_ip
+                    s['data'] = "返回值为空,可能是权限不够。"
                 ret['data'].append(s)
                 print(ret)
             except Exception as e:
@@ -101,7 +108,7 @@ def tools(request):
 
 
 @login_required(login_url="/login.html")
-@permission_required('tasks.add_toolsscript',raise_exception=True)
+@permission_required('tasks.add_toolsscript', raise_exception=True)
 def tools_add(request):
     request.breadcrumbs((('首页', '/'), ('脚本工具', reverse('tools')), ('工具添加', reverse('tools_add'))))
     print("-----------------------")
@@ -121,7 +128,7 @@ def tools_add(request):
 
 
 @login_required(login_url="/login.html")
-@permission_required('tasks.change_toolsscript',raise_exception=True)
+@permission_required('tasks.change_toolsscript', raise_exception=True)
 def tools_update(request, nid):
     tool_id = get_object_or_404(toolsscript, id=nid)
 
@@ -137,7 +144,7 @@ def tools_update(request, nid):
 
 
 @login_required(login_url="/login.html")
-@permission_required('tasks.delete_toolsscript',raise_exception=True)
+@permission_required('tasks.delete_toolsscript', raise_exception=True)
 def tools_delete(request):
     ret = {'status': True, 'error': None, }
     if request.method == "POST":
@@ -366,3 +373,69 @@ def deploy_maven_jar(request):
     else:
         pass
 
+
+'''
+k8s安装
+'''
+
+
+def k8s_install_log_tag_start():
+    dat_file = open(OMMS_LOG_FILE, 'r')
+    count = len(dat_file.readlines())
+    dat_file.close()
+    return count
+
+
+def k8s_install_log_tag_end():
+    dat_file = open(OMMS_LOG_FILE, 'r')
+    count = len(dat_file.readlines())
+    dat_file.close()
+    return count
+
+
+@login_required
+# @permission_required('tasks.add_mavenJar', raise_exception=True)
+def k8s_install(request):
+    logger.info('Installation Task Start Processing')
+    infoList = hostsPlaybook('./doc/kube/hosts', '/etc/ansible/90.setup.yml')
+    logger.info('Installation Task Execution Completion')
+    logger.debug('请求成功！处理结果信息，info:{}'.format(infoList))
+
+
+    # 安装日志结束标记
+    log_end = k8s_install_log_tag_end()
+    logTag = InstallLogTag.objects.filter(service='k8s').order_by('id').last()
+    log_start = logTag.log_start
+    logTag.log_end = log_end
+    logTag.save()
+
+    rlist2 = log_list = []
+    dat_file = open(OMMS_LOG_FILE, 'r')
+    lines = dat_file.readlines()
+
+    for i in range(log_start + 1, log_end-1):
+        log_list.append(lines[i])
+
+    log = ''.join(log_list)
+    log_info = {"log_info": log}
+
+    rlist2.append(log_info)
+    rjson = json.dumps(rlist2)
+    response = HttpResponse()
+    response['Content-Type'] = "text/javascript"
+    response.write(rjson)
+    return response
+
+
+@login_required
+# @permission_required('tasks.add_mavenJar', raise_exception=True)
+def k8s(request):
+    request.breadcrumbs((('首页', '/'), ('K8S安装', reverse('k8s_install'))))
+
+    # 安装日志开始标记
+    log_start = k8s_install_log_tag_start()
+    logTag = InstallLogTag()
+    logTag.service = 'k8s'
+    logTag.log_start = log_start
+    logTag.save()
+    return render(request, 'tasks/k8s.html')

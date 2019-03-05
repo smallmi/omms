@@ -21,7 +21,7 @@
                 <div class="col-sm-3">
                     <a class="btn btn-sm btn-default btn-flush">批量刷新</a>
                     <a class="btn btn-sm btn-primary btn-import" data-toggle="modal" data-target="#importHostsModal">导入</a>
-                    <a class="btn btn-sm btn-primary btn-export">导出</a>
+                    <a href="{% url 'export_hosts' %}" class="btn btn-sm btn-primary btn-export">导出</a>
                 </div>
 {#                <div class="col-sm-1 col-center-block">#}
 {#                    <input id="file-Portrait" name="hostsFile" type="file" class="file-loading">#}
@@ -35,9 +35,9 @@
                     </th>
                     <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">IP</th>
                     <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">主机名称</th>
-                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">项目名称</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">项目名称 [ZH]</th>
                     <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">IDC机房</th>
-                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">服务名称</th>
+                    <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">服务名称 [EN]</th>
                     <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">运行状态</th>
                     <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">创建者</th>
                     <th tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1">创建时间</th>
@@ -86,7 +86,8 @@
         }).on("fileuploaded", function (event, data, previewId, index) {
             layer.msg("上传成功");
             setTimeout("closeUpladLayer()",2000);
-            {#window.location = "/cmdb/server_list/";#}
+            setTimeout("window.location = '/cmdb/server_list/'",1000);
+            {#window.location = '/cmdb/server_list/';#}
         });
     }
 
@@ -272,7 +273,7 @@
         $('.btn-flush').on('click', function () {
             var url = "/cmdb/flushAllHosts/"
             $.get(url, function (msg) {
-                ajax_callback(msg);
+                flush_callback(msg);
             });
         });
 
@@ -333,7 +334,7 @@
             var url = "/cmdb/postmachineinfo/";
 
             $.get(url, {data: data}, function (msg) {
-                ajax_callback(msg);
+                flush_callback(msg);
             });
         });
 
@@ -396,7 +397,7 @@
         /*
         *ajax get callback
         */
-        function ajax_callback(msg) {
+        function flush_callback(msg) {
             var msg = $.parseJSON(msg);
             var index = layer.alert(msg, { //layer控件提示信息
                 skin: 'layui-layer-molv' //样式类名
@@ -404,6 +405,29 @@
                 if (msg == '刷新成功') {
                     window.location = "/cmdb/server_list/";
                 } else if (msg == '批量刷新成功') {
+                    window.location = "/cmdb/server_list/";
+                } else if (msg == '失败') {
+                    window.location = "/cmdb/server_list/";
+                }
+                    {#        else if (msg == '无权限操作'){#}
+                    {#            window.location="/cmdb/server_list/";#}
+                    {#        }#}
+                else {
+                    layer.close(index)
+                }
+            });
+        }
+
+
+        /*
+        *ajax get callback
+        */
+        function ajax_callback(msg) {
+            var msg = $.parseJSON(msg);
+            var index = layer.alert(msg, { //layer控件提示信息
+                skin: 'layui-layer-molv' //样式类名
+            }, function () {
+                if (msg == '成功') {
                     window.location = "/cmdb/server_list/";
                 } else if (msg == '失败') {
                     window.location = "/cmdb/server_list/";

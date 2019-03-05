@@ -1,17 +1,20 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 '''
     Author: smallmi
     Blog: http://www.smallmi.com
 '''
 import os
-
+import xlrd as xlrd
+from openpyxl import Workbook
 from django.db.models import Count
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.urls import reverse
+from openpyxl.writer.excel import save_virtual_workbook
+from pytz import unicode
 
 from cmdb.forms import ServerForm, SystemUserForm
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, FileResponse
 from django.shortcuts import render
 from commons.paginator import paginator
 from cmdb.models import *
@@ -20,6 +23,10 @@ from django.contrib.auth.decorators import permission_required, login_required
 # Create your views here.
 from controller.public.permissions import check_perms
 from controller.ansible_api.get_hosts_api import *
+from release.models import Platform
+import logging
+
+logger = logging.getLogger('omms')
 
 PAGE_SIZE = 10  # 每页显示条数
 current_page_total = 10  # 分页下标
@@ -50,7 +57,6 @@ def index(request):
 @login_required
 @permission_required('cmdb.view_server', raise_exception=True)
 def server_list(request):
-
     form = ServerForm()
     server = Server.objects.order_by('id')
     groups = ServerGroup.objects.values_list('id', 'name')
@@ -558,6 +564,7 @@ def postmachineinfo(request):
         ]
 
         infoList = get_host_info(assets)
+        logger.info('请求成功！采集该主机信息开始，host:{}'.format(server.in_ip))
 
         if not infoList[0]['status']:
             response.write(json.dumps(u'主机网络不可达'))
@@ -585,8 +592,6 @@ def postmachineinfo(request):
                 else:
                     server.status = data['status']
                 server.save()
-
-
 
             # set_service_port(server)  # 设置服务端口信息
             response.write(json.dumps(u'刷新成功'))
@@ -647,8 +652,43 @@ def flushAllHosts(request):
 
 @login_required
 # @permission_required('cmdb.update_server', raise_exception=True)
+def export_hosts(request):
+    server = Server.objects.order_by('id')
+    servers = server.values_list('in_ip', 'system_user__username', 'system_user__password', 'app_project__app_name_en',
+                                 'cpu_cores', 'cpu_count', 'mem', 'disk', 'groups__name', 'app_project__platform__name',
+                                 'idc__name', 'author__username', 'ctime')
+    header_text = "IP,用户名,密码,服务名称,CPU核数,CPU个数,内存,磁盘,所属资产组,所属平台,IDC机房,创建者,创建时间"
+    excel_name = unicode(u'服务器详细列表')
+    headers = unicode(header_text).split(',')
+    book = Workbook()
+    sheet = book.create_sheet(title=excel_name, index=0)
+    sheet.append(headers)
+    if servers:
+        for server in servers:
+            serverList = list(server)
+            sheet.append(serverList)
+    else:
+        logger.info('资产查询无数据')
+    response = HttpResponse(content=save_virtual_workbook(book), content_type='application/msexcel')
+    response['Content-Disposition'] = 'attachment; filename=servers_list.xlsx'
+    return response
+
+
+@login_required
+# @permission_required('cmdb.update_server', raise_exception=True)
+def download_template(request):
+    file = open('./doc/file/Template.xlsx', 'rb')
+    response = FileResponse(file)
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="Template.xlsx"'
+    return response
+
+
+@login_required
+# @permission_required('cmdb.update_server', raise_exception=True)
 def upload_hosts(request):
     result = {"data": []}
+    createAuthor = request.user
     response = HttpResponse()
     response['Content-Type'] = "text/javascript"
     hostsFile = request.FILES.getlist('hostsFile')
@@ -661,4 +701,78 @@ def upload_hosts(request):
                 file.write(chrunk)
             file.close()
         result["filename"] = filename
+
+    excel_table_by_name(filename, createAuthor)
     return JsonResponse(result)
+
+
+def excel_table_by_name(file_excel, createAuthor, col_name_index=0, by_name=u'Sheet1'):
+    """
+        根据名称获取Excel表格中的数据
+        参数: file_excel：Excel文件路径
+             col_name_index：表头列名所在行的所以
+             by_name：Sheet1名称
+    """
+    data = xlrd.open_workbook(file_excel)
+    table = data.sheet_by_name(by_name)
+    n_rows = table.nrows  # 行数
+    # col_names = table.row_values(col_name_index)  # 某一行数据
+
+    row_list = []
+    for row_num in range(1, n_rows):
+        row_dict = {}
+        row = table.row_values(row_num)
+        row_dict['in_ip'] = row[0]
+        row_dict['username'] = row[1]
+        row_dict['password'] = row[2]
+        row_dict['app_name_cn'] = row[3]
+        row_dict['app_name_en'] = row[4]
+        row_dict['groupName'] = row[5]
+        row_dict['platform_name'] = row[6]
+        row_dict['idcName'] = row[7]
+        row_list.append(row_dict)
+
+    for rl in row_list:
+        server = Server.objects.filter(in_ip=rl['in_ip'])
+        if not server:
+            logger.info('主机不存在，开始导入；host:{}'.format(str(rl['in_ip'])))
+
+            try:
+                pn = Platform.objects.get(name=rl['platform_name']).id
+            except Platform.DoesNotExist:
+                logger.info('平台不存在，准备创建；platform:{}'.format(rl['platform_name']))
+                Platform.objects.create(name=rl['platform_name'], created_by=createAuthor)
+                pn = Platform.objects.get(name=rl['platform_name']).id
+
+            try:
+                an = AppProject.objects.get(app_name_en=rl['app_name_en']).id
+            except (AppProject.DoesNotExist, ServerGroup.DoesNotExist, Idc.DoesNotExist, SystemUser.DoesNotExist, Platform.DoesNotExist):
+                logger.info('应用不存在，准备创建；app:{}'.format(rl['app_name_en']))
+                AppProject.objects.create(app_name_en=rl['app_name_en'], app_name_cn=rl['app_name_cn'], platform_id=int(pn), author=createAuthor)
+                an = AppProject.objects.get(app_name_en=rl['app_name_en']).id
+
+            try:
+                sg = ServerGroup.objects.get(name=rl['groupName']).id
+            except ServerGroup.DoesNotExist:
+                logger.info('资产组不存在，准备创建；group:{}'.format(rl['groupName']))
+                ServerGroup.objects.create(name=rl['groupName'], created_by=createAuthor)
+                sg = ServerGroup.objects.get(name=rl['groupName']).id
+
+            try:
+                idcn = Idc.objects.get(name=rl['idcName']).id
+            except Idc.DoesNotExist:
+                logger.info('IDC不存在，准备创建；IDC:{}'.format(rl['idcName']))
+                Idc.objects.create(name=rl['idcName'], created_by=createAuthor)
+                idcn = Idc.objects.get(name=rl['idcName']).id
+
+            try:
+                un = SystemUser.objects.get(username=rl['username']).id
+            except SystemUser.DoesNotExist:
+                logger.info('linux系统用户不存在，准备创建；user:{}'.format(rl['username']))
+                SystemUser.objects.create(name=rl['username'], username=rl['username'], password=rl['password'])
+                un = SystemUser.objects.get(username=rl['username']).id
+
+            sb = Server.objects.create(in_ip=rl['in_ip'], app_project_id=int(an), idc_id=int(idcn), system_user_id=int(un), author=createAuthor)
+            sb.groups.add(int(sg))
+        else:
+            logger.info('主机存在，导入操作不执行；host:{}'.format(str(rl['in_ip'])))

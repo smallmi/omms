@@ -252,54 +252,54 @@
         };
     </script>
 
-    <script type="text/javascript">
-
-        $('.btn-email').on('click', function (event) {
-            var btn = $(event.target);
-            var row = btn.data('row').split('|');
-            var id = row[0];
-            var cauthor = row[1];
-            var nuser = "{{ request.session.fullname }}";
-            if (cauthor == nuser || "{{ request.user.is_superuser }}".bool()) {
-                $("a").attr("data-target", "#editor");
-                $("#email").empty();
-                $.get("{% url 'get_email' %}", function (data, status) {
-                    if (data.length > 0 && status == "success") {
-                        $.each(jQuery.parseJSON(data), function (k, v) {
-                            var obj = document.getElementById("email");
-                            var op = new Option(v.name, v.name)
-                            obj.add(op);
-                        })
-                    }
-                    resetChosen();
-
-                });
-
-                $('.btn-commit').on('click', function () {
-                    var email_group = $('#email').val();
-                    $.ajax({
-                        type: "POST",
-                        url: "{% url 'send_mails' %}",
-                        async: true,
-                        data: {"content_id": id, "email_group": JSON.stringify(email_group)},
-                        success: function (data, textStatus) {
-                            window.location.reload()
-                        },
-                        error: function (XMLHttpRequest, textStatus, errorThrown) {
-                            alert(XMLHttpRequest.status);
-                            alert(XMLHttpRequest.readyState);
-                            alert(textStatus);
-                        },
-                    });
-                });
-            }
-            else {
-                $("a").removeAttr("data-target");
-                alert("只有创建者才可以发送通知！");
-            }
-
-        });
-
-    </script>
+{#    <script type="text/javascript">#}
+{##}
+{#        $('.btn-email').on('click', function (event) {#}
+{#            var btn = $(event.target);#}
+{#            var row = btn.data('row').split('|');#}
+{#            var id = row[0];#}
+{#            var cauthor = row[1];#}
+{#            var nuser = "{{ request.session.fullname }}";#}
+{#            if (cauthor == nuser || "{{ request.user.is_superuser }}".bool()) {#}
+{#                $("a").attr("data-target", "#editor");#}
+{#                $("#email").empty();#}
+{#                $.get("{% url 'get_email' %}", function (data, status) {#}
+{#                    if (data.length > 0 && status == "success") {#}
+{#                        $.each(jQuery.parseJSON(data), function (k, v) {#}
+{#                            var obj = document.getElementById("email");#}
+{#                            var op = new Option(v.name, v.name)#}
+{#                            obj.add(op);#}
+{#                        })#}
+{#                    }#}
+{#                    resetChosen();#}
+{##}
+{#                });#}
+{##}
+{#                $('.btn-commit').on('click', function () {#}
+{#                    var email_group = $('#email').val();#}
+{#                    $.ajax({#}
+{#                        type: "POST",#}
+{#                        url: "{% url 'send_mails' %}",#}
+{#                        async: true,#}
+{#                        data: {"content_id": id, "email_group": JSON.stringify(email_group)},#}
+{#                        success: function (data, textStatus) {#}
+{#                            window.location.reload()#}
+{#                        },#}
+{#                        error: function (XMLHttpRequest, textStatus, errorThrown) {#}
+{#                            alert(XMLHttpRequest.status);#}
+{#                            alert(XMLHttpRequest.readyState);#}
+{#                            alert(textStatus);#}
+{#                        },#}
+{#                    });#}
+{#                });#}
+{#            }#}
+{#            else {#}
+{#                $("a").removeAttr("data-target");#}
+{#                alert("只有创建者才可以发送通知！");#}
+{#            }#}
+{##}
+{#        });#}
+{##}
+{#    </script>#}
 
 {% endblock %}

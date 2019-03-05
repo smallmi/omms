@@ -24,6 +24,15 @@ from django_auth_ldap.config import LDAPSearch
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(BASE_DIR, 'extra_apps'))
 
+PROJECT_DIR = os.path.dirname(BASE_DIR)
+LOG_DIR = os.path.join(PROJECT_DIR, 'logs')
+OMMS_LOG_FILE = os.path.join(LOG_DIR, 'omms.log')
+ANSIBLE_LOG_FILE = os.path.join(LOG_DIR, 'ansible.log')
+LOG_LEVEL = 'DEBUG'
+
+if not os.path.isdir(LOG_DIR):
+    os.makedirs(LOG_DIR)
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
@@ -53,6 +62,7 @@ INSTALLED_APPS = [
     'tasks',
     'release',
     'monitor',
+    'kube',
 ]
 
 MIDDLEWARE = [
@@ -144,6 +154,93 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+# Logging setting
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'main': {
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+            'format': '%(asctime)s [%(module)s %(levelname)s] %(message)s',
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'main'
+        },
+        'file': {
+            'encoding': 'utf8',
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'maxBytes': 1024*1024*100,
+            'backupCount': 7,
+            'formatter': 'main',
+            'filename': OMMS_LOG_FILE,
+        },
+        'ansible_logs': {
+            'encoding': 'utf8',
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'formatter': 'main',
+            'filename': ANSIBLE_LOG_FILE,
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['null'],
+            'propagate': False,
+            'level': LOG_LEVEL,
+        },
+        'django.request': {
+            'handlers': ['console', 'file'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['console', 'file'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+        'omms': {
+            'handlers': ['console', 'file'],
+            'level': LOG_LEVEL,
+        },
+        'omms.users.api': {
+            'handlers': ['console', 'file'],
+            'level': LOG_LEVEL,
+        },
+        'omms.users.view': {
+            'handlers': ['console', 'file'],
+            'level': LOG_LEVEL,
+        },
+        'ops.ansible_api': {
+            'handlers': ['console', 'ansible_logs'],
+            'level': LOG_LEVEL,
+        },
+        'django_auth_ldap': {
+            'handlers': ['console', 'file'],
+            'level': "INFO",
+        },
+        # 'django.db': {
+        #     'handlers': ['console', 'file'],
+        #     'level': 'DEBUG'
+        # }
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/

@@ -7,6 +7,9 @@
 
 from ansible.plugins.callback import CallbackBase
 from ansible.plugins.callback.default import CallbackModule
+import logging
+
+logger = logging.getLogger('omms')
 
 
 class AdHocResultCallback(CallbackModule):
@@ -125,6 +128,7 @@ class PlaybookResultCallBack(CallbackBase):
         self.item_results = {}  # {"host": []}
 
     def _new_play(self, play):
+        # logger.info("PLAY {}".format(play.name))
         return {
             'play': {
                 'name': play.name,
@@ -134,6 +138,7 @@ class PlaybookResultCallBack(CallbackBase):
         }
 
     def _new_task(self, task):
+        # logger.info("TASK {}".format(task.get_name()))
         return {
             'task': {
                 'name': task.get_name(),
@@ -148,9 +153,13 @@ class PlaybookResultCallBack(CallbackBase):
         pass
 
     def v2_playbook_on_task_start(self, task, is_conditional):
+        logger.info('--------------------------------------------------------')
+        logger.info("{}".format(task))
         self.results[-1]['tasks'].append(self._new_task(task))
 
     def v2_playbook_on_play_start(self, play):
+        logger.info("*******************************************************")
+        logger.info("PLAY {}".format(play))
         self.results.append(self._new_play(play))
 
     def v2_playbook_on_stats(self, stats):
@@ -167,6 +176,7 @@ class PlaybookResultCallBack(CallbackBase):
                 'plays': self.results,
                 'stats': summary
             }
+            logger.info('PLAY执行结果状态{}'.format(summary))
 
     def gather_result(self, res):
         if res._task.loop and "results" in res._result and res._host.name in self.item_results:
@@ -176,18 +186,22 @@ class PlaybookResultCallBack(CallbackBase):
         self.results[-1]['tasks'][-1]['hosts'][res._host.name] = res._result
 
     def v2_runner_on_ok(self, res, **kwargs):
+        # logger.info('执行成功 {}'.format(res._result))
+        logger.info('执行成功 [' + res._host.name + '] : {}'.format(res._result['changed']))
         if "ansible_facts" in res._result:
             del res._result["ansible_facts"]
 
         self.gather_result(res)
 
     def v2_runner_on_failed(self, res, **kwargs):
+        logger.error('执行失败 [' + res._host.name + '] :{}'.format(res._result['msg']))
         self.gather_result(res)
 
     def v2_runner_on_unreachable(self, res, **kwargs):
         self.gather_result(res)
 
     def v2_runner_on_skipped(self, res, **kwargs):
+        logger.warning('执行跳过 {}'.format(res._result['skipped']))
         self.gather_result(res)
 
     def gather_item_result(self, res):

@@ -75,12 +75,20 @@
             </li>
 
             <li>
-                <a href="#"><i class="fa fa-tasks"></i> <span class="nav-label">执行任务</span>
+                <a href="#"><i class="fa fa-tasks"></i> <span class="nav-label">K8S管理（测试）</span>
+                    <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li><a href={% url 'kube_list' %}>节点列表</a></li>
+                    <li><a href="#">参数模板</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class="fa fa-tasks"></i> <span class="nav-label">运维工具</span>
                     <span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level">
                     <li><a href={% url 'cmd' %}>命令行</a></li>
-                    <li><a href={% url 'tools' %}>脚本工具</a></li>
-                    {#                    <li><a href={% url 'maven_jar' %}>上传私服包</a></li>#}
+                    <li><a href={% url 'k8s' %}>K8S安装</a></li>
                 </ul>
             </li>
 

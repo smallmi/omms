@@ -1,0 +1,38 @@
+- name: 安装解压工具
+  package: name={{ item }} state=present
+  with_items:
+    - zip
+    - unzip
+
+- name: 创建临时目录
+  file:
+    path: /tmp/auth
+    state: directory
+    mode: 0755
+
+- name: 解压python扩展包pexpect
+  unarchive:
+    src: "pexpect-3.3.zip"
+    dest: /tmp/auth
+    copy: yes
+    keep_newer: yes
+    mode: 0755
+
+- name: 开始安装python扩展包pexpect
+  shell: "cd /tmp/auth/pexpect-3.3 && \
+  /usr/bin/python setup.py install"
+
+
+- name: 下载授信脚本
+  copy: src=auth.py dest=/tmp/auth
+
+- name: 下载节点列表文件
+  template: src=host_list.txt.j2 dest=/tmp/auth/host_list.txt
+
+- name: deploy节点开始授信到其他机器
+  shell: "cd /tmp/auth && /usr/bin/python auth.py"
+
+- name: 清理临时文件
+  file:
+    path: /tmp/auth
+    state: absent

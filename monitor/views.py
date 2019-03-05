@@ -56,7 +56,7 @@ def monitor_list(request):
             elif float(i[3]) > 80:
                 swap_warn += 1
         else:
-            print('Server ID: ' + str(i[0]) + ' 资源信息为空')
+            logger.info('Server ID: ' + str(i[0]) + ' 资源信息为空')
 
     data = paginator(request, server)
 

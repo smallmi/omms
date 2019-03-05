@@ -19,4 +19,7 @@ urlpatterns = [
     url(r'^tools-script.html$', views.tools_script_post, name='tools_script_post'),
     url(r'^maven_jar/$', views.maven_jar, name='maven_jar'),
     url(r'^deploy_maven_jar/$', views.deploy_maven_jar, name='deploy_maven_jar'),
+
+    url(r'^k8s_install/$', views.k8s_install, name='k8s_install'),
+    url(r'^k8s/$', views.k8s, name='k8s'),
 ]

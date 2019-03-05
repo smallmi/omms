@@ -134,7 +134,9 @@ class Server(models.Model):
     author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, verbose_name=u'创建者')
 
     def __unicode__(self):
-        return '%s - %s' % (self.in_ip, self.host_name)
+        return '%s（%s）' % (self.in_ip, self.host_name)
+
+    __str__ = __unicode__
 
     class Meta:
         permissions = (

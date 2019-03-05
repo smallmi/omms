@@ -68,5 +68,7 @@ urlpatterns = [
 
 
     url(r'^upload_hosts/$', views.upload_hosts, name='upload_hosts'),
+    url(r'^download_template/', views.download_template, name='download_template'),
+    url(r'^export_hosts/', views.export_hosts, name='export_hosts'),
 
 ]

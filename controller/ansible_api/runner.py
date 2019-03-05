@@ -17,6 +17,9 @@ import ansible.constants as C
 
 from .callback import AdHocResultCallback, PlaybookResultCallBack, CommandResultCallback
 from .exceptions import AnsibleError
+import logging
+
+logger = logging.getLogger('omms')
 
 
 __all__ = ["AdHocRunner", "PlayBookRunner"]
@@ -110,6 +113,7 @@ class PlayBookRunner:
             loader=self.loader, inventory=self.inventory
         )
         # self.passwords = options.passwords
+        # self.passwords = passwords
         self.passwords = {"passwords":''}#为了修改paramiko中的bug添加入，无实际意义
         self.__check()
 
@@ -142,6 +146,9 @@ class PlayBookRunner:
             results={"results_callback":results_callback,"status":status}
             return results
         except Exception as e:
+            logger.error('执行runner错误，results_callback:{}'.format(e))
+            logger.error('错误详细信息：{}'.format(self.results_callback.output))
+            return e
             raise AnsibleError('The hostname parameter or groups parameter in the BaseInventory \
                                does not match the hosts parameter in the yaml file.')
 

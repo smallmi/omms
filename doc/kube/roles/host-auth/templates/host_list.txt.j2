@@ -1,0 +1,18 @@
+{% for host in groups['etcd'] %}
+{{ host }} {{AUTH_PASS}}
+{% endfor %}
+{% for host in groups['kube-master'] %}
+{{ host }} {{AUTH_PASS}}
+{% endfor %}
+{% for host in groups['kube-node'] %}
+{{ host }} {{AUTH_PASS}}
+{% endfor %}
+{% for host in groups['new-master'] %}
+{{ host }} {{AUTH_PASS}}
+{% endfor %}
+{% for host in groups['new-node'] %}
+{{ host }} {{AUTH_PASS}}
+{% endfor %}
+{% for host in groups['harbor'] %}
+{{ host }} {{AUTH_PASS}}
+{% endfor %}

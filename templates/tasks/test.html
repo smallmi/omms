@@ -1,0 +1,39 @@
+<html>
+ <head>
+   <title>Ajax Test</title>
+   <script src="http://cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
+   <script type="text/javascript" language="javascript">
+   		function update(id) {
+   			$.getJSON("/tasks/data/" + id + "/",function(data) {
+            	$.each(data, function(){
+            		$("#content").html('<p>' + this.name + ' is a ' + this.subject + ' teacher.</p>');
+            	});
+   			});
+   		}
+   		function timeDown(limit, i) {
+   			limit--;
+   			if (i > 4) {
+   				i = 0;
+   			}
+   			if (limit < 0) {
+   				limit = 3;
+   				update(i);
+   				i++;
+   			}
+   			$('#time').text(limit + '秒后刷新');
+   			setTimeout(function() {
+   			    timeDown(limit, i);
+   		    }, 1000)
+   		}
+
+   		$(document).ready(function() {
+   			timeDown(3, 0)
+        })
+   </script>
+ </head>
+ <body>
+   <h1>Ajax Test</h1>
+   <p id="time"></p>
+   <div id="content"></div>
+ </body>
+</html>

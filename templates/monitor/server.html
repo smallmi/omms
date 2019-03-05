@@ -111,7 +111,7 @@
         $('.btn-flush').on('click', function () {
             var url = "/monitor/flushMonitorInfo/"
             $.get(url, function (msg) {
-                ajax_callback(msg);
+                flush_callback(msg);
             });
         });
 
@@ -138,7 +138,7 @@
         /*
         *ajax get callback
         */
-        function ajax_callback(msg) {
+        function flush_callback(msg) {
             var msg = $.parseJSON(msg);
             var index = layer.alert(msg, { //layer控件提示信息
                 skin: 'layui-layer-molv' //样式类名
