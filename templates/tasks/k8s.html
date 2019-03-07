@@ -18,146 +18,155 @@
     <div class="row">
         <div class="col-lg-6">
             <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <h5>K8S安装</h5>
-                </div>
-                <div class="ibox-content">
-                    <h3>
+                <div class="ibox-content pre-scrollable" style="max-height: 700px;">
+                    <h2>
                         K8S安装说明：
                         <div class="hr-line-solid"></div>
-                    </h3>
-                    <h4>
-                        第一步：
-                        在每个节点安装依赖工具
-                        <br>
-                        <div class="hr-line-dashed"></div>
-                        Ubuntu 16.04 请执行以下脚本:
-<br>
-                        # 文档中脚本默认均以root用户执行<br>
-                        apt-get update && apt-get upgrade -y && apt-get dist-upgrade -y<br>
-                        # 安装python2<br>
-                        apt-get install python2.7<br>
-                        # Ubuntu16.04可能需要配置以下软连接<br>
-                        ln -s /usr/bin/python2.7 /usr/bin/python<br><br>
+                    </h2>
 
-                        CentOS 7 请执行以下脚本：<br>
-
-                        # 文档中脚本默认均以root用户执行<br>
-                        # 安装 epel 源并更新<br>
-                        yum install epel-release -y<br>
-                        yum update<br>
-                        # 安装python<br>
-                        yum install python -y<br>
-                    </h4>
-
-                    {#                    <form class="form-horizontal" method="post" action="{% url "deploy_maven_jar" %}" enctype="multipart/form-data">#}
-                    {#                        <div class="form-group">#}
-                    {#                            <div class="col-sm-10 col-sm-offset-0">#}
-                    {#                                {% bootstrap_field form.groupId layout="horizontal" %}#}
-                    {#                                {% bootstrap_field form.artifactId layout="horizontal" %}#}
-                    {#                                {% bootstrap_field form.version layout="horizontal" %}#}
-                    {#                                {% bootstrap_field form.classifier layout="horizontal" %}#}
-                    {#                            </div>#}
-                    {#                        </div>#}
-                    {#                        <div class="form-group">#}
-                    {#                            <div class="col-sm-8 col-center-block">#}
-                    {#                                <input id="file-Portrait" name="jarFile" type="file" class="file-loading">#}
-                    {#                            </div>#}
-                    {#                        </div>#}
-
+                    <h3 style="font-style:italic;">准备工作</h3>
+                    <p>按照多主多节点示例的节点配置，准备4台虚机，搭建一个多主高可用集群。</p>
+                    <h4>1.基础系统配置</h4>
+                    <ul>
+                        <li>推荐内存2G/硬盘30G以上</li>
+                        <li>最小化安装<code>Ubuntu 16.04 server</code>或者<code>CentOS 7 Minimal</code></li>
+                        <li>配置基础网络、更新源、SSH登陆等</li>
+                    </ul>
+                    <h4>2.在每个节点安装依赖工具</h4>
+                    <p>Ubuntu 16.04 请执行以下脚本:</p>
+                    <div class="highlight highlight-source-shell">
+<pre>
+<span class="pl-c"><span class="pl-c">#</span> 文档中脚本默认均以root用户执行</span>
+apt-get update <span class="pl-k">&amp;&amp;</span> apt-get upgrade -y <span class="pl-k">&amp;&amp;</span> apt-get dist-upgrade -y
+<span class="pl-c"><span class="pl-c">#</span> 安装python2</span>
+apt-get install python2.7
+<span class="pl-c"><span class="pl-c">#</span> Ubuntu16.04可能需要配置以下软连接</span>
+ln -s /usr/bin/python2.7 /usr/bin/python</pre>
+                    </div>
+                    <p>CentOS 7 请执行以下脚本：</p>
+                    <div class="highlight highlight-source-shell">
+<pre>
+<span class="pl-c"><span class="pl-c">#</span> 文档中脚本默认均以root用户执行</span>
+<span class="pl-c"><span class="pl-c">#</span> 安装 epel 源并更新</span>
+yum install epel-release -y
+yum update
+<span class="pl-c"><span class="pl-c">#</span> 安装python</span>
+yum install python -y</pre>
+                    </div>
+                    <h4>3.在omms节点安装及准备ansible</h4>
+                    <p>pip 安装 ansible</p>
+                    <div class="highlight highlight-source-shell">
+<pre>
+<span class="pl-c"><span class="pl-c">#</span> Ubuntu 16.04 </span>
+apt-get install git python-pip -y
+<span class="pl-c"><span class="pl-c">#</span> CentOS 7</span>
+yum install git python-pip -y
+<span class="pl-c"><span class="pl-c">#</span> pip安装ansible(国内如果安装太慢可以直接用pip阿里云加速)</span>
+<span class="pl-c"><span class="pl-c">#</span>pip install pip --upgrade</span>
+<span class="pl-c"><span class="pl-c">#</span>pip install ansible</span>
+pip install pip --upgrade -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+pip install --no-cache-dir ansible -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com</pre>
+                    </div>
                     <div class="hr-line-dashed"></div>
-                    {#                        <div class="form-group">#}
-                    {#                            <div class="col-sm-4 col-sm-offset-8">#}
-                    {#                                <button class="btn btn-success" type="submit">上传</button>#}
-                    {#                                <button class="btn btn-white" type="reset">重置</button>#}
-                    {#                            </div>#}
-                    {#                        </div>#}
-                    {#                    </form>#}
 
                 </div>
                 <div class="hr-line-dashed"></div>
                 <div class="form-group">
                     <div class="col-sm-4 col-sm-offset-8">
+                        <a class="btn btn-sm btn-primary btn-import" data-toggle="modal" data-target="#importHostsModal">导入hosts</a>
                         <button class="btn btn-success" type="submit" id="k8s_install">已阅说明，开始安装</button>
                     </div>
                 </div>
             </div>
         </div>
         {% include 'tasks/k8s-install.html' %}
-{#        <div class="col-sm-6">#}
-{#            <div class="ibox float-e-margins">#}
-{#                <div class="ibox-title">#}
-{#                    <h5>输出结果：</h5>#}
-{#                    <h5>#}
-                        {#                        <div style="color:red;">  {{ msg }}</div>#}
-{#                    </h5>#}
-{#                </div>#}
-{#                <div class="ibox-content  pres" id="log_info">#}
-{#                    <pre> <span>shiwo</span></pre>#}
-{#                </div>#}
-{#            </div>#}
-{#        </div>#}
     </div>
+    {% include 'tasks/k8s_modal.html' %}
 {% endblock %}
 
 {% block javascripts %}
     {{ block.super }}
 
-{#    <script>#}
-{#   		function update() {#}
-{#   			$.getJSON("/tasks/flush_k8s_install_log/",function(data) {#}
-{#            	$.each(data, function(){#}
-{#            		$("#log_info").html('<pre> <span>' + this.log_info + '</span></pre>');#}
-{#            	});#}
-{#   			});#}
-{#   		}#}
-{#   		function timeDown(limit, i) {#}
-{#   			limit--;#}
-{#   			if (i > 4) {#}
-{#   				i = 0;#}
-{#   			}#}
-{#   			if (limit < 0) {#}
-{#   				limit = 1;#}
-{#   				update(i);#}
-{#   				i++;#}
-{#   			}#}
-{#   			$('#time').text(limit + '秒后刷新');#}
-{#   			setTimeout(function() {#}
-{#   			    timeDown(limit, i);#}
-{#   		    }, 1000)#}
-{#   		}#}
-{##}
-{#   		$(document).ready(function() {#}
-{#   			timeDown(1, 0)#}
-{#        })#}
-{#   </script>#}
+    <script>
+    initFileInput("file-Portrait", "/tasks/upload_hosts_file/");
+
+        //初始化fileinput控件（第一次初始化）
+    function initFileInput(ctrlName, uploadUrl) {
+        var control = $('#' + ctrlName);
+
+        control.fileinput({
+            language: 'zh', //设置语言
+            {#theme: "explorer-fa",#}
+            uploadUrl: uploadUrl, //上传的地址
+            allowedFileExtensions: ['omms'],//接收的文件后缀
+            maxFileCount: 2,
+            enctype: 'multipart/form-data',
+            showUpload: true, //是否显示上传按钮
+            {#showCancel:true,#}
+            showCaption:false,                                  // 显示文件文本框
+            dropZoneEnabled:true,                          // 是否可拖拽
+            showRemove:true,                                       // 显示移除按钮
+            uploadClass:"btn btn-primary",
+            browseClass: "btn btn-primary", //按钮样式
+            previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
+            msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+        }).on("fileuploaded", function (event, data, previewId, index) {
+            layer.msg("上传成功");
+            setTimeout("closeUpladLayer()",2000);
+            setTimeout("window.location = '/tasks/k8s/'",1000);
+            {#window.location = '/cmdb/server_list/';#}
+        });
+    }
+
+    </script>
+
+    <script>
+        {#var i = 0; //可以不要#}
+
+        function sc() {
+            var div = document.getElementById("show-chat-content");
+            {#div.innerText += "\n" + (i++).toString(); //可以不要#}
+            div.scrollTop = div.scrollHeight;
+        }
+
+        var installStatus;
+
+        function update() {
+            $.getJSON("/tasks/flush_k8s_install_log/", function (data) {
+                $.each(data, function () {
+                    $("#log_info").html('<font color="green">' + this.log_info + '</font>');
+                    installStatus = this.install_status;
+                    var s = setInterval(sc(), 1000);
+                });
+            });
+        }
+
+        function timeDown(limit) {
+            limit--;
+            if (limit < 0 && installStatus == 1) {
+                limit = 0;
+                update();
+            }
+            setTimeout(function () {
+                timeDown(limit);
+            }, 500)
+        }
+
+        $('#k8s_install').on('click', function () {
+            timeDown(0, installStatus = 1)
+        });
+
+    </script>
 
     <script>
         $('#k8s_install').on('click', function () {
-            $("#log_info").html('<pre><span><font color="green">开始安装，请耐心等待安装结果...\n' +
-                '也可查看后台日志，日志文件所在位置在项目部署同级目录，如：\ndrwxr-xr-x  2 root root  41 Mar  5 13:21 logs\n' +
-                'drwxr-xr-x 15 root root 284 Mar  5 13:21 omms</font></span></pre>');
             var url = "/tasks/k8s_install/"
-            $.getJSON(url, function (data) {
-                $.each(data, function () {
-                    $("#log_info").html('<pre><span><font color="blue">' + this.log_info + '</font></span></pre>');
-                });
+            $.get(url, function (data) {
             });
             this.disabled = true;
         });
 
     </script>
-{##}
-{#    <script>#}
-{#        $('#k8s_install').on('click', function () {#}
-{#            var url = "/tasks/k8s_install/"#}
-{#            $.get(url, function (msg) {#}
-{#                ajax_callback(msg);#}
-{#            });#}
-{#            this.disabled = true;#}
-{#        });#}
-{##}
-{#    </script>#}
 
 
     <script>

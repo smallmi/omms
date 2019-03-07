@@ -6,6 +6,7 @@
 import time
 
 import re
+from django.http import FileResponse, JsonResponse
 
 from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
@@ -386,45 +387,11 @@ def k8s_install_log_tag_start():
     return count
 
 
-def k8s_install_log_tag_end():
-    dat_file = open(OMMS_LOG_FILE, 'r')
-    count = len(dat_file.readlines())
-    dat_file.close()
-    return count
-
-
-@login_required
-# @permission_required('tasks.add_mavenJar', raise_exception=True)
-def k8s_install(request):
-    logger.info('Installation Task Start Processing')
-    infoList = hostsPlaybook('./doc/kube/hosts', '/etc/ansible/90.setup.yml')
-    logger.info('Installation Task Execution Completion')
-    logger.debug('请求成功！处理结果信息，info:{}'.format(infoList))
-
-
-    # 安装日志结束标记
-    log_end = k8s_install_log_tag_end()
-    logTag = InstallLogTag.objects.filter(service='k8s').order_by('id').last()
-    log_start = logTag.log_start
-    logTag.log_end = log_end
-    logTag.save()
-
-    rlist2 = log_list = []
-    dat_file = open(OMMS_LOG_FILE, 'r')
-    lines = dat_file.readlines()
-
-    for i in range(log_start + 1, log_end-1):
-        log_list.append(lines[i])
-
-    log = ''.join(log_list)
-    log_info = {"log_info": log}
-
-    rlist2.append(log_info)
-    rjson = json.dumps(rlist2)
-    response = HttpResponse()
-    response['Content-Type'] = "text/javascript"
-    response.write(rjson)
-    return response
+# def k8s_install_log_tag_end():
+#     dat_file = open(OMMS_LOG_FILE, 'r')
+#     count = len(dat_file.readlines())
+#     dat_file.close()
+#     return count
 
 
 @login_required
@@ -439,3 +406,68 @@ def k8s(request):
     logTag.log_start = log_start
     logTag.save()
     return render(request, 'tasks/k8s.html')
+
+
+@login_required
+# @permission_required('tasks.add_mavenJar', raise_exception=True)
+def k8s_install(request):
+    logger.info('Installation K8S Task Start Processing')
+    infoList = hostsPlaybook('./doc/kube/hosts.omms', '/etc/ansible/90.setup.yml')
+    logger.info('Installation K8S Task Execution Completion')
+    logger.debug('请求成功！处理结果信息，info:{}'.format(infoList))
+
+    return render(request, 'tasks/k8s.html')
+
+
+def flush_k8s_install_log(request):
+    logTag = InstallLogTag.objects.filter(service='k8s').order_by('id').last()
+    log_start = logTag.log_start
+
+    dat_file = open(OMMS_LOG_FILE, 'r')
+    lines = dat_file.readlines()
+
+    rlist2 = []
+    log_list = []
+    for i in range(log_start, len(lines)):
+        if "Installation K8S Task" in lines[i]:
+            log_list.append(lines[i])
+        elif "callback INFO" in lines[i]:
+            log_list.append(lines[i])
+
+    log = ''.join(log_list)
+    log_info = {"log_info": log, "install_status": 1}
+    if 'Installation K8S Task Execution Completion' in log_info['log_info']:
+        log_info = {"log_info": log, "install_status": 0}
+
+    rlist2.append(log_info)
+    rjson = json.dumps(rlist2)
+    response = HttpResponse()
+    response['Content-Type'] = "text/javascript"
+    response.write(rjson)
+    return response
+
+
+def download_hosts_template(request):
+    file = open('./doc/kube/hosts.omms', 'rb')
+    response = FileResponse(file)
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="hosts.omms"'
+    return response
+
+
+def upload_hosts_file(request):
+    result = {"data": []}
+    response = HttpResponse()
+    response['Content-Type'] = "text/javascript"
+    hostsFile = request.FILES.getlist('hostsFile')
+    if hostsFile is not None:
+        tmpDir = os.path.dirname('./doc/kube/')
+        for i in hostsFile:
+            filename = os.path.join(tmpDir, i.name)
+            file = open(filename, 'wb')
+            for chrunk in i.chunks():
+                file.write(chrunk)
+            file.close()
+        result["filename"] = filename
+
+    return JsonResponse(result)

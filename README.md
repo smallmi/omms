@@ -27,9 +27,13 @@ OMMS 运维监控管理系统
 
 ![登录用户页面](https://gitee.com/uploads/images/2017/1103/163642_d9e5b600_1521920.png "3.png")
 
+![k8s安装页面](https://images.gitee.com/uploads/images/2019/0307/115024_36f1a556_1521920.png)
+
 ![监控页面1](https://images.gitee.com/uploads/images/2019/0129/164022_60343dd9_1521920.jpeg)
 
 ![监控页面2](https://images.gitee.com/uploads/images/2019/0129/164112_7780e34b_1521920.png)
+
+
 
 ## Docker部署
 ```

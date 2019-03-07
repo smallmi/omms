@@ -1,0 +1,15 @@
+<div class="modal inmodal" id="importHostsModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h6 class="modal-title" id="importHostsModal">请选择hosts文件</h6>
+            </div>
+            <div class="modal-body">
+                <a href="{% url 'download_hosts_template' %}" class="btn btn-sm btn-default btn-templet" style="border:dotted;">下载导入模板</a>
+                <input type="file" name="hostsFile" id="file-Portrait" class="file-loading"/>
+            </div>
+        </div>
+    </div>
+</div>
