@@ -1,0 +1,69 @@
+{% extends "base/base_site.html" %}
+{% load	bootstrap3 %}
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="/static/css/plugins/chosen/chosen.css">
+    {{ block.super }}
+    <style>
+        .col-center-block {
+            float: none;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+
+{% endblock %}
+{% block content %}
+<div class="wrapper-content">
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-success pull-right">谷歌开源的容器编排引擎</span>
+                    <h5>K8S安装</h5>
+                </div>
+                <div class="ibox-content">
+                    <a class="btn btn-sm btn-primary" href={% url 'k8s' %}><i class="fa fa-tasks"></i><span class="nav-label"> 安装</span></a>
+                    <a class="btn btn-sm btn-info" disabled="disabled"><i class="fa fa-tasks"></i><span class="nav-label"> 新增节点</span></a>
+                    <a class="btn btn-sm btn-success" disabled="disabled"><i class="fa fa-tasks"></i><span class="nav-label"> 查看详情</span></a>
+                    <a class="btn btn-sm btn-danger" href={% url 'k8s' %}><i class="fa fa-tasks"></i><span class="nav-label"> 卸载</span></a>
+                    <br>
+                    <small>使用Ansible脚本安装K8S集群，提供快速部署高可用k8s集群的工具。</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-info pull-right">优越的分布式文件系统</span>
+                    <h5>Ceph安装</h5>
+                </div>
+                <div class="ibox-content">
+                    <a class="btn btn-sm btn-primary" disabled="disabled"><i class="fa fa-tasks"></i><span class="nav-label"> 安装</span></a>
+                    <a class="btn btn-sm btn-info" disabled="disabled"><i class="fa fa-tasks"></i><span class="nav-label"> 新增节点</span></a>
+                    <a class="btn btn-sm btn-success" disabled="disabled"><i class="fa fa-tasks"></i><span class="nav-label"> 查看详情</span></a>
+                    <a class="btn btn-sm btn-danger" disabled="disabled"><i class="fa fa-tasks"></i><span class="nav-label"> 卸载</span></a>
+                    <br>
+                    <small>使用Ansible脚本安装Ceph集群，快速部署高可用ceph集群的工具。</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <HR style="" width="90%">
+
+    <div class="row">
+
+        <div class="col-lg-12">
+            <div id="platform_one" style="height:400px;"></div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super}}
+{% endblock %}

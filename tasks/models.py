@@ -88,11 +88,26 @@ class mavenJar(models.Model):
         return self.groupId
 
 
+class InstallYaml(models.Model):
+    service = models.CharField(max_length=32, verbose_name='安装服务', null=True)
+    yaml_path = models.CharField(max_length=32, verbose_name='yaml路径', null=True)
+    tasks = models.CharField(max_length=32, verbose_name='执行操作', null=True)
+
+    class Meta:
+        permissions = (
+        )
+        default_permissions = ()
+
+    def __str__(self):
+        return self.service
+
+
 class InstallLogTag(models.Model):
+    # service = models.ForeignKey(InstallYaml, null=True, on_delete=models.SET_NULL, verbose_name=u'安装服务')
     service = models.CharField(max_length=32, verbose_name='安装服务', null=True)
     log_start = models.IntegerField(null=True, blank=True, verbose_name=u'日志起始位置')
-    log_end = models.IntegerField(null=True, blank=True, verbose_name=u'日志结束位置')
-    user = models.CharField(max_length=32, verbose_name='操作者', null=True)
+    # log_end = models.IntegerField(null=True, blank=True, verbose_name=u'日志结束位置')
+    # user = models.CharField(max_length=32, verbose_name='操作者', null=True)
     ctime = models.DateTimeField(auto_now_add=True, verbose_name='时间')
 
     class Meta:
@@ -103,3 +118,5 @@ class InstallLogTag(models.Model):
 
     def __str__(self):
         return self.service
+
+

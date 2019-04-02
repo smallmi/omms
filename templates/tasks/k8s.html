@@ -18,7 +18,7 @@
     <div class="row">
         <div class="col-lg-6">
             <div class="ibox float-e-margins">
-                <div class="ibox-content pre-scrollable" style="max-height: 700px;">
+                <div class="ibox-content pre-scrollable" style="max-height: 390px;">
                     <h2>
                         K8S安装说明：
                         <div class="hr-line-solid"></div>
@@ -72,9 +72,9 @@ pip install --no-cache-dir ansible -i http://mirrors.aliyun.com/pypi/simple/ --t
                 </div>
                 <div class="hr-line-dashed"></div>
                 <div class="form-group">
-                    <div class="col-sm-4 col-sm-offset-8">
+                    <div class="col-sm-6 col-sm-offset-6">
                         <a class="btn btn-sm btn-primary btn-import" data-toggle="modal" data-target="#importHostsModal">导入hosts</a>
-                        <button class="btn btn-success" type="submit" id="k8s_install">已阅说明，开始安装</button>
+                        <button class="btn btn-success" type="submit" id="k8s_install">已阅，开始安装</button>
                     </div>
                 </div>
             </div>
@@ -96,13 +96,11 @@ pip install --no-cache-dir ansible -i http://mirrors.aliyun.com/pypi/simple/ --t
 
         control.fileinput({
             language: 'zh', //设置语言
-            {#theme: "explorer-fa",#}
             uploadUrl: uploadUrl, //上传的地址
             allowedFileExtensions: ['omms'],//接收的文件后缀
             maxFileCount: 2,
             enctype: 'multipart/form-data',
             showUpload: true, //是否显示上传按钮
-            {#showCancel:true,#}
             showCaption:false,                                  // 显示文件文本框
             dropZoneEnabled:true,                          // 是否可拖拽
             showRemove:true,                                       // 显示移除按钮
@@ -114,58 +112,42 @@ pip install --no-cache-dir ansible -i http://mirrors.aliyun.com/pypi/simple/ --t
             layer.msg("上传成功");
             setTimeout("closeUpladLayer()",2000);
             setTimeout("window.location = '/tasks/k8s/'",1000);
-            {#window.location = '/cmdb/server_list/';#}
         });
     }
 
     </script>
 
-    <script>
-        {#var i = 0; //可以不要#}
 
+
+    <script>
         function sc() {
             var div = document.getElementById("show-chat-content");
-            {#div.innerText += "\n" + (i++).toString(); //可以不要#}
             div.scrollTop = div.scrollHeight;
         }
 
-        var installStatus;
-
-        function update() {
-            $.getJSON("/tasks/flush_k8s_install_log/", function (data) {
-                $.each(data, function () {
-                    $("#log_info").html('<font color="green">' + this.log_info + '</font>');
-                    installStatus = this.install_status;
-                    var s = setInterval(sc(), 1000);
-                });
-            });
-        }
-
-        function timeDown(limit) {
-            limit--;
-            if (limit < 0 && installStatus == 1) {
-                limit = 0;
-                update();
-            }
-            setTimeout(function () {
-                timeDown(limit);
-            }, 500)
-        }
-
         $('#k8s_install').on('click', function () {
-            timeDown(0, installStatus = 1)
-        });
-
-    </script>
-
-    <script>
-        $('#k8s_install').on('click', function () {
-            var url = "/tasks/k8s_install/"
-            $.get(url, function (data) {
+            var url = "/tasks/software_install/"
+            var data = {"task_type": 'install', 'service_name':'k8s'};
+            data = JSON.stringify(data);
+            $.get(url, {data: data}, function () {
             });
             this.disabled = true;
+            var socket = new WebSocket("ws://" + window.location.host + "/tasks/flush_log/");
+            console.log(socket);
+            socket.onopen = function () {
+                // alert('WebSocket open')
+                console.log('WebSocket open');//成功连接上Websocket
+                //socket.send("123");//发送数据到服务端
+            };
+            socket.onmessage = function (e) {
+                $("#log_info").append('<font color="green">' + e.data + '</font><br>');
+                var s = setInterval(sc(), 1000);
+            };
+            socket.onclose = function () {
+                console.log('WebSocket close');
+                socket.close();
+            };
         });
-
     </script>
 
 

@@ -19,7 +19,7 @@ from .callback import AdHocResultCallback, PlaybookResultCallBack, CommandResult
 from .exceptions import AnsibleError
 import logging
 
-logger = logging.getLogger('omms')
+logger = logging.getLogger('ansible_api')
 
 
 __all__ = ["AdHocRunner", "PlayBookRunner"]

@@ -80,6 +80,7 @@
                 <ul class="nav nav-second-level">
                     <li><a href={% url 'kube_list' %}>节点列表</a></li>
                     <li><a href="#">参数模板</a></li>
+                    <li><a href="{% url 'kube_test' %}">测试</a></li>
                 </ul>
             </li>
 
@@ -88,7 +89,8 @@
                     <span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level">
                     <li><a href={% url 'cmd' %}>命令行</a></li>
-                    <li><a href={% url 'k8s' %}>K8S安装</a></li>
+                    <li style="display:none"><a href={% url 'k8s' %}>K8S安装</a></li>
+                    <li><a href={% url 'software_manage' %}>软件安装</a></li>
                 </ul>
             </li>
 

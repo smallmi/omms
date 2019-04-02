@@ -18,6 +18,10 @@ from tasks.models import history, toolsscript, mavenJar
 from commons.paginator import paginator
 from django.urls import reverse
 from controller.ansible_api.playbook_api import *
+from kubernetes import client, config
+
+
+config.kube_config.load_kube_config(config_file="./doc/file/kubeconfig.yaml")
 
 
 logger = logging.getLogger('omms')
@@ -42,31 +46,26 @@ def index(request):
 @login_required
 # @permission_required('cmdb.view_server', raise_exception=True)
 def kube_list(request):
-    form = KubeNodeForm()
-    # k8s = Server.objects.filter(app_project__app_name_cn='k8s').values_list('id', 'in_ip')
-    # logger.info('查询k8s节点{}'.format(k8s))
-    server = KubeNode.objects.select_related().all().order_by('id')
+    v1 = client.CoreV1Api()
+    nodeList = []
+    for node in v1.list_node().items:
+        ip = node.metadata.name
+        role = node.metadata.labels['kubernetes.io/role']
+        status = node.metadata.annotations['volumes.kubernetes.io/controller-managed-attach-detach']
+        ctime = node.metadata.creation_timestamp
 
-    data = paginator(request, server)
+        dockerver = node.status.node_info.container_runtime_version
+        kubver = node.status.node_info.kubelet_version
+        os = node.status.node_info.os_image
 
-    request.breadcrumbs((('首页', '/'), ('K8S节点列表', reverse('kube_list'))))
+        data = {'ip': ip, 'role': role, 'status': status, 'ctime': ctime, 'dockerver': dockerver, 'kubver':kubver, 'os': os}
+        # data = {'ip': ip, 'role': role, 'status': status, 'ctime': ctime}
 
-    # data['k8s'] = json.dumps([(i[0], i[1]) for i in k8s])
-    data['form'] = form
+        nodeList.append(data)
 
-    return render_to_response('kube/kube.html', data)
-    # assets = [
-    #     {
-    #         "hostname": '192.168.201.52',
-    #         "ip": '192.168.201.52',
-    #         "port": '22',
-    #         "username": 'oriental',
-    #         "password": '',
-    #     }
-    # ]
-    #
-    # infoList = exePlaybook(assets, './doc/kube/test.yml')
-    # logger.info('请求成功！处理结果信息，info:{}'.format(infoList))
+    request.breadcrumbs((('首页', '/'), ('节点列表', reverse('kube_list'))))
+
+    return render_to_response('kube/kube.html', {'request': request, 'nodeList': nodeList})
 
 
 def kube_vars(request):
@@ -110,19 +109,41 @@ def kube_add(request):
 
 @login_required
 # @permission_required('cmdb.view_server', raise_exception=True)
+# def kube_test(request):
+#
+#     assets = [
+#         {
+#             "hostname": '192.168.88.27',
+#             "ip": '192.168.88.27',
+#             "port": '22',
+#             "username": 'root',
+#             "password": '123.com',
+#         }
+#     ]
+#
+#     infoList = exePlaybook(assets, './doc/kube/01.prepare.yml')
+#     logger.info('请求成功！处理结果信息，info:{}'.format(infoList))
+#
+#     return render_to_response('kube/kube.html')
+
+
+@login_required
+# @permission_required('cmdb.view_server', raise_exception=True)
 def kube_test(request):
+    v1 = client.CoreV1Api()
+    ret = v1.list_pod_for_all_namespaces(watch=False)
+    containerList = []
+    for container in ret.items:
+        ip = container.status.pod_ip
+        name = container.metadata.name
+        namespace = container.metadata.namespace
+        node = container.spec.node_name
+        stime = container.status.start_time
 
-    assets = [
-        {
-            "hostname": '192.168.88.27',
-            "ip": '192.168.88.27',
-            "port": '22',
-            "username": 'root',
-            "password": '123.com',
-        }
-    ]
+        data = {'ip': ip, 'name': name, 'namespace': namespace, 'node': node, 'stime': stime}
 
-    infoList = exePlaybook(assets, './doc/kube/01.prepare.yml')
-    logger.info('请求成功！处理结果信息，info:{}'.format(infoList))
+        containerList.append(data)
 
-    return render_to_response('kube/kube.html')
+    request.breadcrumbs((('首页', '/'), ('容器列表', reverse('kube_test'))))
+
+    return render_to_response('kube/container.html', {'request': request, 'containerList': containerList})

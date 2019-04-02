@@ -20,10 +20,12 @@ urlpatterns = [
     url(r'^maven_jar/$', views.maven_jar, name='maven_jar'),
     url(r'^deploy_maven_jar/$', views.deploy_maven_jar, name='deploy_maven_jar'),
 
-    url(r'^k8s_install/$', views.k8s_install, name='k8s_install'),
+    url(r'^software_install/$', views.software_install, name='software_install'),
     url(r'^k8s/$', views.k8s, name='k8s'),
-    url(r'^flush_k8s_install_log/$', views.flush_k8s_install_log, name='flush_k8s_install_log'),
+    url(r'^flush_log/$', views.flush_log, name='flush_log'),
 
     url(r'^download_hosts_template/$', views.download_hosts_template, name='download_hosts_template'),
     url(r'^upload_hosts_file/$', views.upload_hosts_file, name='upload_hosts_file'),
+
+    url(r'^software_manage/$', views.software_manage, name='software_manage'),
 ]

@@ -76,6 +76,12 @@ MIDDLEWARE = [
     'breadcrumbs.middleware.BreadcrumbsMiddleware',
 ]
 
+WEBSOCKET_FACTORY_CLASS = 'controller.dwebsocket.backends.default.factory.WebSocketFactory'
+# MIDDLEWARE_CLASSES = [
+#     'controller.dwebsocket.middleware.WebSocketMiddleware',
+# ]
+
+
 ROOT_URLCONF = 'omms.urls'
 
 TEMPLATES = [
@@ -169,7 +175,8 @@ LOGGING = {
             'format': '%(asctime)s [%(module)s %(levelname)s] %(message)s',
         },
         'simple': {
-            'format': '%(levelname)s %(message)s'
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+            'format': '[%(asctime)s] [%(levelname)s] %(message)s',
         },
     },
     'handlers': {
@@ -195,7 +202,7 @@ LOGGING = {
             'encoding': 'utf8',
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'formatter': 'main',
+            'formatter': 'simple',
             'filename': ANSIBLE_LOG_FILE,
         },
     },
@@ -227,7 +234,7 @@ LOGGING = {
             'handlers': ['console', 'file'],
             'level': LOG_LEVEL,
         },
-        'ops.ansible_api': {
+        'ansible_api': {
             'handlers': ['console', 'ansible_logs'],
             'level': LOG_LEVEL,
         },
@@ -292,4 +299,4 @@ MAVEN_BIN = '/tools/apache-maven/bin/mvn'
 JAR_UPLOAD_PATH = '/oriental/jar/'
 
 # git代码路径
-GIT_WORKSPACE = '/oriental/workspace/'
+GIT_WORKSPACE = '/tmp/workspace/'

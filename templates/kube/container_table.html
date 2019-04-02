@@ -1,0 +1,17 @@
+{% load accounts_tag %}
+{% for i in containerList %}
+    <tr class="gradeA odd" role="row" id="{{ i.id }}">
+        <td class="sorting_1">{{ forloop.counter }}</td>
+        <td class="center">{{ i.ip }}</td>
+        <td class="center">{{ i.name }}</td>
+        <td class="center">{{ i.node }}</td>
+        <td class="center">{{ i.namespace }}</td>
+        <td class="center">{{ i.stime }}</td>
+
+        <td class="center">
+            <button data-row="{{ i.id }}|{{ i.project_name }}|{{ i.service_name }}|{{ i.in_ip }}|{{ i.ex_ip }}|{{ i.groups.all | grouptostr }}|{{ i.idc_id }}|{{ i.app_project_id }}|{{ i.system_user_id }}" class="btn btn-xs btn-success btn-edit" data-toggle="modal" data-target="#editInfoModal">查看</button>
+            <a class="btn btn-xs btn-danger" id="server_delete_{{i.id}}">删除</a>
+        </td>
+    </tr>
+
+{% endfor %}

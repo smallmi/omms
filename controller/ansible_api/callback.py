@@ -9,7 +9,7 @@ from ansible.plugins.callback import CallbackBase
 from ansible.plugins.callback.default import CallbackModule
 import logging
 
-logger = logging.getLogger('omms')
+logger = logging.getLogger('ansible_api')
 
 
 class AdHocResultCallback(CallbackModule):

@@ -9,3 +9,30 @@
      password: pbkdf2_sha256$36000$bwOL2ef45UxQ$gllF7f7tlz9xskknOhqcanFFpez+4yWW5QNXJDgpcS8=
      date_joined: 2017-09-15
 
+- model: tasks.InstallYaml
+  pk: 1
+  fields:
+     service: k8s
+     yaml_path: /etc/ansible/90.setup.yml
+     tasks: install
+
+- model: tasks.InstallYaml
+  pk: 2
+  fields:
+     service: k8s
+     yaml_path: /etc/ansible/99.clean.yml
+     tasks: uninstall
+
+- model: tasks.InstallYaml
+  pk: 3
+  fields:
+     service: ceph
+     yaml_path: /etc/ansible/30.setup.yml
+     tasks: install
+
+- model: tasks.InstallYaml
+  pk: 4
+  fields:
+     service: ceph
+     yaml_path: /etc/ansible/59.clean.yml
+     tasks: uninstall

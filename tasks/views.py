@@ -13,12 +13,14 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.urls import reverse
 from django.shortcuts import render_to_response
 import subprocess
-from omms.settings import OMMS_LOG_FILE
+
+from controller.dwebsocket import accept_websocket
+from omms.settings import ANSIBLE_LOG_FILE
 
 from cmdb.models import Server
 from commons.paginator import paginator
 from controller.ansible_api.playbook_api import hostsPlaybook
-from .models import history, toolsscript, mavenJar, InstallLogTag
+from .models import history, toolsscript, mavenJar, InstallLogTag, InstallYaml
 import paramiko, json, os
 from .form import ToolForm, JarForm
 import logging
@@ -175,118 +177,11 @@ def tools_bulk_delte(request):
 @login_required(login_url="/login.html")
 def tools_script_post(request):
     pass
-    # ret = {'data': None}
-    #
-    # if request.method == 'POST':
-    #     try:
-    #         host_ids = request.POST.getlist('id', None)
-    #         sh_id = request.POST.get('shid', None)
-    #
-    #         user = request.user
-    #
-    #         if not host_ids:
-    #             error1 = "请选择主机"
-    #             ret = {"error": error1, "status": False}
-    #             return HttpResponse(json.dumps(ret))
-    #
-    #         user = User.objects.get(username=request.user)
-    #         checker = ObjectPermissionChecker(user)
-    #         ids1 = []
-    #         for i in host_ids:
-    #             assets = asset.objects.get(id=i)
-    #             if checker.has_perm('delete_asset', assets, ) == True:
-    #                 ids1.append(i)
-    #         idstring = ','.join(ids1)
-    #
-    #         host = asset.objects.extra(where=['id IN (' + idstring + ')'])
-    #         sh = toolsscript.objects.filter(id=sh_id)
-    #
-    #         for s in sh:
-    #             if s.tool_run_type == 0:
-    #                 with  open('tasks/script/test.sh', 'w+') as f:
-    #                     f.write(s.tool_script)
-    #                     a = 'tasks/script/{}.sh'.format(s.id)
-    #                 os.system("sed 's/\r//'  tasks/script/test.sh >  {}".format(a))
-    #
-    #             elif s.tool_run_type == 1:
-    #                 with  open('tasks/script/test.py', 'w+') as f:
-    #                     f.write(s.tool_script)
-    #                     p = 'tasks/script/{}.py'.format(s.id)
-    #                 os.system("sed 's/\r//'  tasks/script/test.py >  {}".format(p))
-    #             elif s.tool_run_type == 2:
-    #                 with  open('tasks/script/test.yml', 'w+') as f:
-    #                     f.write(s.tool_script)
-    #                     y = 'tasks/script/{}.yml'.format(s.id)
-    #                 os.system("sed 's/\r//'  tasks/script/test.yml >  {}".format(y))
-    #             else:
-    #                 ret['status'] = False
-    #                 ret['error'] = '脚本类型错误,只能是shell、yml、python'
-    #                 return HttpResponse(json.dumps(ret))
-    #
-    #             data1 = []
-    #             for h in host:
-    #                 try:
-    #                     data2 = {}
-    #                     assets = [
-    #                         {
-    #                             "hostname": h.hostname,
-    #                             "ip": h.network_ip,
-    #                             "port": h.port,
-    #                             "username": h.system_user.username,
-    #                             "password": h.system_user.password,
-    #                         },
-    #                     ]
-    #
-    #                     history.objects.create(ip=h.network_ip, root=h.system_user.username, port=h.port, cmd=s.name,
-    #                                            user=user)
-    #                     if s.tool_run_type == 0:
-    #                         task_tuple = (('script', a),)
-    #                         hoc = AdHocRunner(hosts=assets)
-    #                         hoc.results_callback = CommandResultCallback()
-    #                         r = hoc.run(task_tuple)
-    #                         data2['ip'] = h.network_ip
-    #                         data2['data'] = r['contacted'][h.hostname]['stdout']
-    #                         data1.append(data2)
-    #                         print(data1)
-    #
-    #
-    #                     elif s.tool_run_type == 1:
-    #                         task_tuple = (('script', p),)
-    #                         hoc = AdHocRunner(hosts=assets)
-    #                         hoc.results_callback = CommandResultCallback()
-    #                         r = hoc.run(task_tuple)
-    #                         data2['ip'] = h.network_ip
-    #                         data2['data'] = r['contacted'][h.hostname]['stdout']
-    #                         data1.append(data2)
-    #                     elif s.tool_run_type == 2:
-    #                         play = PlayBookRunner(assets, playbook_path=y)
-    #                         b = play.run()
-    #                         data2['ip'] = h.network_ip
-    #                         data2['data'] = b['plays'][0]['tasks'][1]['hosts'][h.hostname]['stdout'] + \
-    #                                         b['plays'][0]['tasks'][1]['hosts'][h.hostname]['stderr']
-    #                         data1.append(data2)
-    #                     else:
-    #                         data2['ip'] = "脚本类型错误"
-    #                         data2['data'] = "脚本类型错误"
-    #                 except  Exception as  e:
-    #                     data2['ip'] = h.network_ip
-    #                     data2['data'] = "账号密码不对,或没有权限,请修改{}".format(e)
-    #                     data1.append(data2)
-    #
-    #             ret['data'] = data1
-    #             return HttpResponse(json.dumps(ret))
-    #     except Exception as e:
-    #         ret['error'] = '未知错误 {}'.format(e)
-    #         return HttpResponse(json.dumps(ret))
 
 
 @login_required(login_url="/login.html")
 def tools_script_get(request, nid):
     pass
-    # if request.method == "GET":
-    #     obj = get_objects_for_user(request.user, 'asset.change_asset')
-    #     sh = toolsscript.objects.filter(id=nid)
-    #     return render(request, 'tasks/tools-script.html', {"asset_list": obj, "sh": sh, "tools_active": "active"})
 
 
 @login_required
@@ -375,76 +270,58 @@ def deploy_maven_jar(request):
         pass
 
 
+@login_required
+# @permission_required('tasks.add_mavenJar', raise_exception=True)
+def software_manage(request):
+    request.breadcrumbs((('首页', '/'), ('软件安装', reverse('software_manage'))))
+    return render(request, 'tasks/software_install.html')
+
+
+@login_required
+# @permission_required('tasks.add_mavenJar', raise_exception=True)
+def software_install(request):
+    data = json.loads(request.GET.get('data', ''))
+    search_dict = dict()
+    search_dict['tasks'] = data['task_type']
+    search_dict['service'] = data['service_name']
+    yaml_info = InstallYaml.objects.filter(**search_dict).values_list('service', 'tasks', 'yaml_path')
+    global i
+    for i in yaml_info:
+        if i[1] == 'install':
+            logger.info('Installation ' + i[0] + ' Task Start Processing')
+            infoList = hostsPlaybook('./doc/kube/hosts.omms', i[2])
+            logger.info('Installation ' + i[0] + ' Task Execution Completion')
+        elif i[1] == 'uninstall':
+            logger.info('Uninstall ' + i[0] + ' Task Start Processing')
+            infoList = hostsPlaybook('./doc/kube/hosts.omms', i[2])
+            logger.info('Uninstall ' + i[0] + ' Task Execution Completion')
+        logger.debug('请求成功！处理结果信息，info:{}'.format(infoList))
+
+    return render(request, 'tasks/'+i[0]+'.html')
+
+
 '''
 k8s安装
 '''
-
-
-def k8s_install_log_tag_start():
-    dat_file = open(OMMS_LOG_FILE, 'r')
-    count = len(dat_file.readlines())
-    dat_file.close()
-    return count
-
-
-# def k8s_install_log_tag_end():
-#     dat_file = open(OMMS_LOG_FILE, 'r')
-#     count = len(dat_file.readlines())
-#     dat_file.close()
-#     return count
-
-
 @login_required
 # @permission_required('tasks.add_mavenJar', raise_exception=True)
 def k8s(request):
-    request.breadcrumbs((('首页', '/'), ('K8S安装', reverse('k8s_install'))))
-
-    # 安装日志开始标记
-    log_start = k8s_install_log_tag_start()
-    logTag = InstallLogTag()
-    logTag.service = 'k8s'
-    logTag.log_start = log_start
-    logTag.save()
+    request.breadcrumbs((('首页', '/'), ('软件安装', reverse('software_manage'))))
     return render(request, 'tasks/k8s.html')
 
 
-@login_required
-# @permission_required('tasks.add_mavenJar', raise_exception=True)
-def k8s_install(request):
-    logger.info('Installation K8S Task Start Processing')
-    infoList = hostsPlaybook('./doc/kube/hosts.omms', '/etc/ansible/90.setup.yml')
-    logger.info('Installation K8S Task Execution Completion')
-    logger.debug('请求成功！处理结果信息，info:{}'.format(infoList))
-
-    return render(request, 'tasks/k8s.html')
-
-
-def flush_k8s_install_log(request):
-    logTag = InstallLogTag.objects.filter(service='k8s').order_by('id').last()
-    log_start = logTag.log_start
-
-    dat_file = open(OMMS_LOG_FILE, 'r')
-    lines = dat_file.readlines()
-
-    rlist2 = []
-    log_list = []
-    for i in range(log_start, len(lines)):
-        if "Installation K8S Task" in lines[i]:
-            log_list.append(lines[i])
-        elif "callback INFO" in lines[i]:
-            log_list.append(lines[i])
-
-    log = ''.join(log_list)
-    log_info = {"log_info": log, "install_status": 1}
-    if 'Installation K8S Task Execution Completion' in log_info['log_info']:
-        log_info = {"log_info": log, "install_status": 0}
-
-    rlist2.append(log_info)
-    rjson = json.dumps(rlist2)
-    response = HttpResponse()
-    response['Content-Type'] = "text/javascript"
-    response.write(rjson)
-    return response
+@accept_websocket
+def flush_log(request):
+    if request.is_websocket():
+        popen = subprocess.Popen('/usr/bin/tailf -n 0 ' + ANSIBLE_LOG_FILE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                 shell=True)
+        while True:
+            line = popen.stdout.readline().strip()
+            if line:
+                request.websocket.send(line)
+            else:
+                request.websocket.close()
+                break
 
 
 def download_hosts_template(request):

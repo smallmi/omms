@@ -9,7 +9,7 @@ from controller.ansible_api.inventory import BaseInventory
 from controller.ansible_api.runner import AdHocRunner
 import logging
 
-logger = logging.getLogger('omms')
+logger = logging.getLogger('ansible_api')
 
 
 def init(assets):
