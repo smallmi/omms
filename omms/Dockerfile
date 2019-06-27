@@ -16,10 +16,13 @@ COPY settings.py omms
 RUN yum -y install sshpass && pip install -i https://pypi.douban.com/simple/  -r requirements.txt
 
 # 数据初始化
-RUN python manage.py makemigrations && python manage.py migrate && python manage.py loaddata default_user
+#RUN python manage.py makemigrations && python manage.py migrate && python manage.py loaddata default_user
 
 # EXPOSE 映射端口
 EXPOSE 10000
 
+# 容器启动后数据初始化
+CMD python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py loaddata default_user && python3 /workspaces/omms/manage.py runserver 0.0.0.0:10000
+
 # 容器启动后时执行
-CMD ["python3", "/workspaces/omms/manage.py", "runserver", "0.0.0.0:10000"]
+#CMD ["python3", "/workspaces/omms/manage.py", "runserver", "0.0.0.0:10000"]

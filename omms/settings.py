@@ -115,11 +115,11 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'omms',
         'USER': 'root',
-        'PASSWORD': 'Dfjr@2017!~',
-        'HOST': '192.168.201.53',
+        'PASSWORD': 'test@123',
+        'HOST': 'mysql',
         'PORT': '3306',
         'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES', storage_engine='MyISAM'",
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'charset': 'utf8',
         },
     }

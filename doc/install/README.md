@@ -30,15 +30,24 @@ systemctl enable docker
 
 8、验证安装是否成功(有client和service两部分表示docker安装启动都成功了)
 ```
+
 ### 构建镜像并启动：
+
+获取mysql镜像并启动:
 ```
-1、进入到omms/omms目录，即settings.py文件所在目录
-2、修改settings.py中数据库地址、账户、密码等信息
-3、构建镜像
-docker build -t omms:v1 .
-4、启动omms程序
-docker run -d --name omms -p 10000:10000 omms:v1
-5、访问docker所在机器的10000端口即可，账密admin/admin
+1、创建mysql数据持久化目录
+mkdir /data
+
+2、运行mysql镜像
+docker run --name mysql -v /data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD="test@123" -e MYSQL_DATABASE="omms" -d mysql:5.7 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+```
+
+快速启动omms
+```
+1、启动omms程序
+docker run --name omms --link mysql:mysql -p 10000:10000 -d smallmi/omms:v1.0.0
+
+2、访问docker所在宿主机的10000端口即可，账密admin/admin
 ```
 
 ## Linux部署
