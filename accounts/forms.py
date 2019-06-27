@@ -11,6 +11,8 @@ from django.contrib import auth
 from accounts.models import Project,Contact
 import ldap
 from omms import settings
+import logging
+logger = logging.getLogger('omms')
 
 class LoginForm(forms.Form):
     username = forms.CharField(required=True,label=u"用户名",error_messages={'required': u'请输入用户名'},widget=forms.TextInput(attrs={'placeholder':u"用户名"}))
@@ -27,32 +29,61 @@ class LoginForm(forms.Form):
         password = self.cleaned_data.get('password')
 
         if username and password:
-            conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI)
-            user = username + settings.LDAP_DOMAIN
-            try:
-                conn.simple_bind_s(user, password)
+            if settings.AUTH_LDAP:
+                conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI)
+                user = username + settings.LDAP_DOMAIN
                 try:
-                    user = User.objects.get(username=username)
-                    if user.check_password(password):
-                        self.user_cache = auth.authenticate(username=username, password=password)
-                    else:
-                        user.set_password(password)
-                        user.save()
-                except ObjectDoesNotExist as e:
+                    conn.simple_bind_s(user, password)
                     try:
-                        user = User()
-                        user.username = username
-                        user.set_password(password)
-                        user.is_active = True
-                        user.save()
-                    except Exception as e:
-                        print(e)
-                    self.user_cache = auth.authenticate(username=username, password=password)
-            except:
+                        user = User.objects.get(username=username)
+                        if user.check_password(password):
+                            self.user_cache = auth.authenticate(username=username, password=password)
+                        else:
+                            user.set_password(password)
+                            user.save()
+                    except ObjectDoesNotExist as e:
+                        try:
+                            user = User()
+                            user.username = username
+                            user.set_password(password)
+                            user.is_active = True
+                            user.save()
+                        except Exception as e:
+                            print(e)
+                        self.user_cache = auth.authenticate(username=username, password=password)
+                except Exception as e:
+                    logger.error("ldap认证错误:{}".format(e))
+            else:
                 self.user_cache = auth.authenticate(username=username, password=password)
 
-                if self.user_cache is None:
-                    raise forms.ValidationError(u'账号密码不匹配')
+
+            # conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI)
+            # user = username + settings.LDAP_DOMAIN
+            # try:
+            #     conn.simple_bind_s(user, password)
+            #     try:
+            #         user = User.objects.get(username=username)
+            #         if user.check_password(password):
+            #             self.user_cache = auth.authenticate(username=username, password=password)
+            #         else:
+            #             user.set_password(password)
+            #             user.save()
+            #     except ObjectDoesNotExist as e:
+            #         try:
+            #             user = User()
+            #             user.username = username
+            #             user.set_password(password)
+            #             user.is_active = True
+            #             user.save()
+            #         except Exception as e:
+            #             print(e)
+            #         self.user_cache = auth.authenticate(username=username, password=password)
+            # except:
+            #     self.user_cache = auth.authenticate(username=username, password=password)
+
+            if self.user_cache is None:
+                print('账号密码不匹配')
+                raise forms.ValidationError(u'账号密码不匹配')
         return self.cleaned_data
         
     def get_user(self):

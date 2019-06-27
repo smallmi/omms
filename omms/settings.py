@@ -40,6 +40,7 @@ if not os.path.isdir(LOG_DIR):
 SECRET_KEY = '8=t&=8ozvlnr9d^n+b=^y*o188fps%5wj@p^gopbloyi8@gh)8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# 如果使用uwsgi方式启动，需将DEBUG设置为False
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
@@ -125,6 +126,9 @@ DATABASES = {
 }
 
 
+# 开启LDAP设置为True
+AUTH_LDAP = False
+
 # ladp的地址和端口号
 AUTH_LDAP_SERVER_URI = "ldap://192.168.201.74:389"
 
@@ -134,13 +138,16 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch("DC=oriental-finance,DC=com", ldap.SCOPE_SUBT
                                    "(&(objectClass=person)(sAMAccountName=%(user)s))")
 
 
-AUTHENTICATION_BACKENDS = (
+AUTH_LDAP_BACKEND = "django_auth_ldap.backend.LDAPBackend"
 
-    "django_auth_ldap.backend.LDAPBackend",
+AUTHENTICATION_BACKENDS = [
 
     "django.contrib.auth.backends.ModelBackend",
 
-)
+]
+
+if AUTH_LDAP:
+    AUTHENTICATION_BACKENDS.insert(0, AUTH_LDAP_BACKEND)
 
 
 # Password validation
@@ -180,10 +187,6 @@ LOGGING = {
         },
     },
     'handlers': {
-        'null': {
-            'level': 'DEBUG',
-            'class': 'logging.NullHandler',
-        },
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
@@ -198,25 +201,8 @@ LOGGING = {
             'formatter': 'main',
             'filename': OMMS_LOG_FILE,
         },
-        'ansible_logs': {
-            'encoding': 'utf8',
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'formatter': 'simple',
-            'filename': ANSIBLE_LOG_FILE,
-        },
     },
     'loggers': {
-        'django': {
-            'handlers': ['null'],
-            'propagate': False,
-            'level': LOG_LEVEL,
-        },
-        'django.request': {
-            'handlers': ['console', 'file'],
-            'level': LOG_LEVEL,
-            'propagate': False,
-        },
         'django.server': {
             'handlers': ['console', 'file'],
             'level': LOG_LEVEL,
@@ -225,27 +211,7 @@ LOGGING = {
         'omms': {
             'handlers': ['console', 'file'],
             'level': LOG_LEVEL,
-        },
-        'omms.users.api': {
-            'handlers': ['console', 'file'],
-            'level': LOG_LEVEL,
-        },
-        'omms.users.view': {
-            'handlers': ['console', 'file'],
-            'level': LOG_LEVEL,
-        },
-        'ansible_api': {
-            'handlers': ['console', 'ansible_logs'],
-            'level': LOG_LEVEL,
-        },
-        'django_auth_ldap': {
-            'handlers': ['console', 'file'],
-            'level': "INFO",
-        },
-        # 'django.db': {
-        #     'handlers': ['console', 'file'],
-        #     'level': 'DEBUG'
-        # }
+        }
     }
 }
 
@@ -266,6 +232,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, '/static/')
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
@@ -274,8 +241,8 @@ LOGIN_URL = '/accounts/login/'
 MEDIA_ROOT = 'uploads/'
 MEDIA_URL = 'uploads/'
 
-BREADCRUMBS_AUTO_HOME: True
-BREADCRUMBS_HOME_TITLE: u'Home'
+BREADCRUMBS_AUTO_HOME = True
+BREADCRUMBS_HOME_TITLE = u'Home'
 
 EMAIL_USE_TLS = False
 EMAIL_HOST = 'smtp.mxhichina.com'

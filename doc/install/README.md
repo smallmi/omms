@@ -98,6 +98,13 @@ DATABASES = {
     }
 }
 ```
+
+开启LDAP认证:
+```
+开启LDAP设置为True，并配置ladp的地址和端口号等信息
+AUTH_LDAP = False
+```
+
 修改通知邮箱settings.py:
 
 ```
@@ -121,8 +128,21 @@ python manage.py loaddata default_user
 
 ### 登录
 
+开发模式下启动（单线程）
 ```
 python manage.py runserver 192.168.22.22:8000
 http://192.168.22.22:8000
 admin admin
+```
+
+使用uWSGI方式启动（支持多线程）:
+```
+如果使用uwsgi方式启动，需将DEBUG设置为False
+DEBUG = False
+
+进入到项目根目录运行以下命令：
+uwsgi uwsgi.ini
+
+注意：如果需要后台运行，需要修改uwsig.ini配置，去掉注释即可
+;daemonize = /oriental/logs/ccms_uwsgi.log
 ```
