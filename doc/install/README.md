@@ -45,7 +45,7 @@ docker run --name mysql -v /data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD="test@123
 快速启动omms
 ```
 1、启动omms程序
-docker run --name omms --link mysql:mysql -p 10000:10000 -d smallmi/omms:v1.0.0
+docker run --name omms --link mysql:mysql -p 10000:10000 -d smallmi/omms:latest
 
 2、访问docker所在宿主机的10000端口即可，账密admin/admin
 ```
