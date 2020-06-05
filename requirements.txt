@@ -16,7 +16,7 @@ chardet==3.0.4
 constantly==15.1.0
 cryptography==2.5
 daphne==2.2.5
-Django==2.1.4
+Django==2.2.13
 django-auth-ldap==1.7.0
 django-bootstrap3==11.0.0
 django-breadcrumbs==1.1.4a1
