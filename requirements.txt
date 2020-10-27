@@ -14,7 +14,7 @@ channels==2.1.7
 channels-redis==2.3.3
 chardet==3.0.4
 constantly==15.1.0
-cryptography==2.5
+cryptography==3.2
 daphne==2.2.5
 Django==2.1.4
 django-auth-ldap==1.7.0
