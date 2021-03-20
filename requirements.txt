@@ -27,7 +27,7 @@ hyperlink==18.0.0
 idna==2.8
 incremental==17.5.0
 jdcal==1.4
-Jinja2==2.10
+Jinja2==2.11.3
 kubernetes==9.0.0
 MarkupSafe==1.1.0
 mod-pywebsocket==0.7.9
